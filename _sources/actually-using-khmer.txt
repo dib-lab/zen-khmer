@@ -132,3 +132,16 @@ the ``ctb`` branch; the documents are `here
 
 Note: the protocols serve as an important part of the release checklist,
 because they verify that khmer works as part of a larger set of tools.
+
+Choosing parameters
+===================
+
+Memory parameters, and where they matter
+----------------------------------------
+
+K-mer sizes, and k-mer size limitations
+---------------------------------------
+
+Input and output formats
+------------------------
+

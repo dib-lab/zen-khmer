@@ -6,6 +6,9 @@ Infrastructure and development for the khmer project
 Version control
 ===============
 
+All of khmer development is done at http://github.com/dib-lab/khmer/ using
+Git and GitHub.
+
 Issue tracking
 ==============
 

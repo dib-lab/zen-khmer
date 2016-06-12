@@ -1,214 +1,487 @@
-====================================
-Exploring graphs and graph structure
-====================================
-
-Graphs can be a tremendously powerful way to look at sequencing data,
-but unlike k-mers, operating on graphs can be very computationally
-expensive.  This is largely because of combinatorics: for example,
-forks and loops in the graph make simple traversal expensive.  Some of
-khmer's functionality is aimed at simplifying, or at least making possible,
-some basic traversal approaches.
-
-Building waypoints in De Bruijn graphs
-======================================
-
-khmer provides a technique called 'tagging', in which a subset of
-k-mers in the graph are chosen as representatives of the whole graph -
-and we choose these representatives so that *every* k-mer in the
-entire graph is within distance D of at least one representative.
-
-(khmer does this by using the reads as a guide into the graph;khmer
-makes sure that each read has a tag every D k-mers, and, since the
-graph is entirely constructed from reads, then the graph ends up being
-tagged at distance D as well.)
-
-Tagging has a few nice features:
-
-* there are many fewer tags than there are k-mers (2D fold fewer,
-  approximately.)
-  
-* the structure and connectivity of the tags serves as a good proxy
-  for the connectivity of the overall graph; in this way they serve
-  as a sort of sparse graph.
-
-* tags are somewhat refractory to coverage: highly covered regions will
-  get many fewer tags than the number of reads from that region.
-
-* tags provide a good entry point into the graph for traversal; in essense,
-  they provide waypoints for other work.
-
-* tags could, in theory, be used as an index into the reads. (@CTB expand.)
-
-Graph theory friends tell me that this is actually a D-dominating set,
-and we'll revisit this concept later on (c.f. spacegraphcats).
-
-.. note::
-
-   Right now we don't do a very efficient job of creating the tags.
-   I have a few ideas for improving this using streaming approaches.
-
-.. note::
-
-   Our tag data structure implementation is pretty bad - we use an STL set
-   to store the tags...
-
-To make use of tags, the tags need to be built first.  Here's an example.
-
-First, construct a Nodegraph:
-
->>> K = 21
->>> ng = khmer.Nodegraph(K, 1e6, 4)
-
-Create a sequence longer than K:
-
->>> seq = 'CCCTGTTAGCTACGTCCGTCTAAGGATATTAACATAGTTGCGACTGCGTCCTGTGCTCA'
-
-Now, instead of adding it to ``ng`` with ``consume``, use ``consume_and_tag``::
-
->>> ng.consume_and_tag(seq)
-
-You can now look at the tags with ``get_tags_and_positions``::
-
->>> ng.get_tags_and_positions(seq)
-[(19, 156582046028), (39, 1984875433400)]
-
-Here, the first element of each tuple is the position of the tag
-within the sequence, and the second element is the actual tag -- you
-can convert those back into DNA with ``reverse_hash``::
-
->>> x = ng.get_tags_and_positions(seq)
->>> ng.reverse_hash(x[0][1])
-AACTATGTTAATATCCTTAGA
-
-Points to make:
-
-* you can use any query sequence you want, not just the one you used to
-  create the tags ;).
-
-* the tagging distance D is 40 by default, and can be adjusted with
-  ``_set_tag_density``.
-
-Partitioning
-============
-
-The motivation behind tags came from a desire to *partition* data sets:
-back when, our intution was that metagenome data sets should split up
-into disconnected components based on their origin species.  (You can
-read more in Pell et al., 2012. @cite.)
-
-This is challenging because you essentially want an all-by-all connectivity
-map for the graph - you want to know, does read A connect (transitively)
-to read Z, by any path, and you want to know this for all the reads in the
-data set.  This is hard!
-
-We initially developed tagging for the purpose of partitioning, and we
-do the following:
-
-* tag the graph systematically (as explained above);
-
-* explore to a distance D from each tag, and identify all neighboring
-  tags within distance D;
-
-* assign partition IDs to each set of connected tags;
-
-* split the reads up based on their partition IDs.
-
-This does work, mostly, and it turns out to split the graph up into
-bins that group reads by species. @@more here.
-
-For an example of partitioning, let's construct an artifical sequence.
-
->>> longseq = ("AGGAGGAGCATTTGTGCGATGCCCTATGGGGAGACCTATCTGCCGGGGAAATGCGCACA",
-...    "TAACATAATCTAATCTACCACATTATGAACCCCCAGTGGGCACGTGTTCATTGCGTACGATCGCATTC",
-...    "TACTTGATTCCCGCAGTGGTACGACGCTATGTA")
->>> longseq = "".join(longseq)
-
-If we break this 160-bp sequence up into three bits,
-
->>> begin = longseq[:70]
->>> middle = longseq[40:120]
->>> end = longseq[90:]
-
-we can see that ``begin`` and ``end`` shouldn't connect without ``middle``.
-Let's see if partitioning agrees!
-
-First, let's build a graph and then add the beginning and end bits:
-
->>> K = 21
->>> ng = khmer.Nodegraph(K, 1e6, 4)
->>> ng.consume_and_tag(begin)
->>> ng.consume_and_tag(end)
-
-Now, run the partitioning code, get back a partition object, and ask
-for a partition count:
-
->>> p = ng.do_subset_partition()
->>> n_partitions, _ = p.count_partitions()
->>> print(n_partitions)
-2
-
-Yep - 2 partitions!
-
-Now let's add the middle bit, which will connect the two isolated partitions:
-
->>> ng.consume_and_tag(middle)
-
-If we redo the partitioning, we should now get 1 partition:
-
->>> p = ng.do_subset_partition()
->>> n_partitions, _ = p.count_partitions()
->>> print(n_partitions)
-1
-
-...and we do!
-
-Partitioning hasn't, in the end, proven to be that useful in practice.
-The downsides of the approach are:
-
-* it turns out that any source of systematic bias in sequencing will
-  result in a completely connected graph (@cite); such biases are
-  common.
-
-* it also turns out that most metagenome graphs are, in reality,
-  completely connected.
-
-However, tags are still potentially useful for other things than straight
-up partitioning.
-
-Labeling graphs
-===============
-
-Camille Scott extended tagging with *labels* - the idea is that
-each tag can be labelled with 1 or more arbitrary identifiers.
-This lets you do things like build colored De Bruijn graphs,
-equiv. do pangenome analysis.
-
-References:
-
-http://ivory.idyll.org/blog/2015-wok-labelhash.html
-
-https://github.com/dib-lab/2015-khmer-wok4-multimap/blob/master/do-counting.py
-
-Building compact De Bruijn graphs
-=================================
-
-De Bruijn graphs themselves are often quite large, because they have
-as many nodes in them as there are unique k-mers in the data set.
-Many of these k-mers may be collapsable into linear paths.  The result
-of doing this graph contraction is called a "compact De Bruijn graph",
-and we have some functionality for building them in khmer.
-
-This functionality consists of two functions on graphs:
-``find_high_degree_nodes`` and ``traverse_and_mark_linear_paths``.
-
-There's a script sandbox/extract-compact-dbg.py.
-
-.. @hmm, could build with two different grahps at same time, different fp
-
-Visualizing compact De Bruijn graphs with Gephi
-===============================================
-
-Assembling linear sequences
-===========================
-
-Next: :doc:`summarizing-khmer-basics`
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "import khmer"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Exploring graphs and graph structure\n",
+    "\n",
+    "Graphs can be a tremendously powerful way to look at sequencing data,\n",
+    "but unlike k-mers, operating on graphs can be very computationally\n",
+    "expensive.  This is largely because of combinatorics: for example,\n",
+    "forks and loops in the graph make simple traversal expensive.  Some of\n",
+    "khmer's functionality is aimed at simplifying, or at least making possible,\n",
+    "some basic traversal approaches.\n",
+    "\n",
+    "## Some basic traversal functions.\n",
+    "\n",
+    "## Building waypoints in De Bruijn graphs\n",
+    "\n",
+    "khmer provides a technique called 'tagging', in which a subset of\n",
+    "k-mers in the graph are chosen as representatives of the whole graph -\n",
+    "and we choose these representatives so that *every* k-mer in the\n",
+    "entire graph is within distance D of at least one representative.\n",
+    "\n",
+    "(khmer does this by using the reads as a guide into the graph;khmer\n",
+    "makes sure that each read has a tag every D k-mers, and, since the\n",
+    "graph is entirely constructed from reads, then the graph ends up being\n",
+    "tagged at distance D as well.)\n",
+    "\n",
+    "Tagging has a few nice features:\n",
+    "\n",
+    "* there are many fewer tags than there are k-mers (2D fold fewer,\n",
+    "  approximately.)\n",
+    "  \n",
+    "* the structure and connectivity of the tags serves as a good proxy\n",
+    "  for the connectivity of the overall graph; in this way they serve\n",
+    "  as a sort of sparse graph.\n",
+    "\n",
+    "* tags are somewhat refractory to coverage: highly covered regions will\n",
+    "  get many fewer tags than the number of reads from that region.\n",
+    "\n",
+    "* tags provide a good entry point into the graph for traversal; in essense,\n",
+    "  they provide waypoints for other work.\n",
+    "\n",
+    "* tags could, in theory, be used as an index into the reads. (@CTB expand.)\n",
+    "\n",
+    "Graph theory friends tell me that this is actually a D-dominating set,\n",
+    "and we'll revisit this concept later on (c.f. spacegraphcats).\n",
+    "\n",
+    ">   Right now we don't do a very efficient job of creating the tags.\n",
+    ">   I have a few ideas for improving this using streaming approaches.\n",
+    "\n",
+    ">   Our tag data structure implementation is pretty bad - we use an STL set\n",
+    ">   to store the tags...\n",
+    "\n",
+    "To make use of tags, the tags need to be built first.  Here's an example.\n",
+    "\n",
+    "First, construct a Nodegraph:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    ">>> K = 21\n",
+    ">>> ng = khmer.Nodegraph(K, 1e6, 4)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Create a sequence longer than K:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    ">>> seq = 'CCCTGTTAGCTACGTCCGTCTAAGGATATTAACATAGTTGCGACTGCGTCCTGTGCTCA'"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now, instead of adding it to ``ng`` with ``consume``, use ``consume_and_tag``:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "39"
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    ">>> ng.consume_and_tag(seq)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "You can now look at the tags with ``get_tags_and_positions``:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[(19, 156582046028), (39, 1984875433400)]"
+      ]
+     },
+     "execution_count": 19,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    ">>> ng.get_tags_and_positions(seq)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Here, the first element of each tuple is the position of the tag\n",
+    "within the sequence, and the second element is the actual tag -- you\n",
+    "can convert those back into DNA with ``reverse_hash``:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'AACTATGTTAATATCCTTAGA'"
+      ]
+     },
+     "execution_count": 20,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    ">>> x = ng.get_tags_and_positions(seq)\n",
+    ">>> ng.reverse_hash(x[0][1])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Points to make:\n",
+    "\n",
+    "* you can use any query sequence you want, not just the one you used to\n",
+    "  create the tags ;).\n",
+    "\n",
+    "* the tagging distance D is 40 by default, and can be adjusted with\n",
+    "  ``_set_tag_density``."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Partitioning\n",
+    "\n",
+    "The motivation behind tags came from a desire to *partition* data sets:\n",
+    "back when, our intution was that metagenome data sets should split up\n",
+    "into disconnected components based on their origin species.  (You can\n",
+    "read more in Pell et al., 2012. @cite.)\n",
+    "\n",
+    "This is challenging because you essentially want an all-by-all connectivity\n",
+    "map for the graph - you want to know, does read A connect (transitively)\n",
+    "to read Z, by any path, and you want to know this for all the reads in the\n",
+    "data set.  This is hard!\n",
+    "\n",
+    "We initially developed tagging for the purpose of partitioning, and we\n",
+    "do the following:\n",
+    "\n",
+    "* tag the graph systematically (as explained above);\n",
+    "\n",
+    "* explore to a distance D from each tag, and identify all neighboring\n",
+    "  tags within distance D;\n",
+    "\n",
+    "* assign partition IDs to each set of connected tags;\n",
+    "\n",
+    "* split the reads up based on their partition IDs.\n",
+    "\n",
+    "This does work, mostly, and it turns out to split the graph up into\n",
+    "bins that group reads by species. @@more here.\n",
+    "\n",
+    "For an example of partitioning, let's construct an artifical sequence."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    ">>> longseq = (\"AGGAGGAGCATTTGTGCGATGCCCTATGGGGAGACCTATCTGCCGGGGAAATGCGCACA\",\n",
+    "...    \"TAACATAATCTAATCTACCACATTATGAACCCCCAGTGGGCACGTGTTCATTGCGTACGATCGCATTC\",\n",
+    "...    \"TACTTGATTCCCGCAGTGGTACGACGCTATGTA\")\n",
+    ">>> longseq = \"\".join(longseq)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "If we break this 160-bp sequence up into three bits,"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    ">>> begin = longseq[:70]\n",
+    ">>> middle = longseq[40:120]\n",
+    ">>> end = longseq[90:]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "we can see that ``begin`` and ``end`` shouldn't connect without ``middle``.\n",
+    "Let's see if partitioning agrees!\n",
+    "\n",
+    "First, let's build a graph and then add the beginning and end bits:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "50"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    ">>> K = 21\n",
+    ">>> ng = khmer.Nodegraph(K, 1e6, 4)\n",
+    ">>> ng.consume_and_tag(begin)\n",
+    ">>> ng.consume_and_tag(end)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now, run the partitioning code, get back a partition object, and ask\n",
+    "for a partition count:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "2\n"
+     ]
+    }
+   ],
+   "source": [
+    ">>> p = ng.do_subset_partition()\n",
+    ">>> n_partitions, _ = p.count_partitions()\n",
+    ">>> print(n_partitions)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Yep - 2 partitions!\n",
+    "\n",
+    "Now let's add the middle bit, which will connect the two isolated partitions:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0"
+      ]
+     },
+     "execution_count": 22,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    ">>> ng.consume_and_tag(middle)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "If we redo the partitioning, we should now get 1 partition:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "2\n"
+     ]
+    }
+   ],
+   "source": [
+    ">>> p = ng.do_subset_partition()\n",
+    ">>> n_partitions, _ = p.count_partitions()\n",
+    ">>> print(n_partitions)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "...and we do!\n",
+    "\n",
+    "Partitioning hasn't, in the end, proven to be that useful in practice ([also see blog post](http://ivory.idyll.org/blog/2016-partitioning-no-more.html)).\n",
+    "The downsides of the approach are:\n",
+    "\n",
+    "* it turns out that any source of systematic bias in sequencing will\n",
+    "  result in a completely connected graph (@cite); such biases are\n",
+    "  common.\n",
+    "\n",
+    "* it also turns out that most metagenome graphs are, in reality,\n",
+    "  completely connected.\n",
+    "\n",
+    "However, tags are still potentially useful for other things than straight\n",
+    "up partitioning."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Labeling graphs\n",
+    "\n",
+    "Camille Scott extended tagging with *labels* - the idea is that\n",
+    "each tag can be labelled with 1 or more arbitrary identifiers.\n",
+    "This lets you do things like build colored De Bruijn graphs,\n",
+    "equiv. do pangenome analysis.\n",
+    "\n",
+    "References:\n",
+    "\n",
+    "http://ivory.idyll.org/blog/2015-wok-labelhash.html\n",
+    "\n",
+    "https://github.com/dib-lab/2015-khmer-wok4-multimap/blob/master/do-counting.py"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Building compact De Bruijn graphs\n",
+    "\n",
+    "De Bruijn graphs themselves are often quite large, because they have\n",
+    "as many nodes in them as there are unique k-mers in the data set.\n",
+    "Many of these k-mers may be collapsable into linear paths.  The result\n",
+    "of doing this graph contraction is called a \"compact De Bruijn graph\",\n",
+    "and we have some functionality for building them in khmer.\n",
+    "\n",
+    "This functionality consists of two functions on graphs:\n",
+    "``find_high_degree_nodes`` and ``traverse_and_mark_linear_paths``.\n",
+    "\n",
+    "There's a script sandbox/extract-compact-dbg.py.\n",
+    "\n",
+    ".. @hmm, could build with two different grahps at same time, different fp"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Visualizing compact De Bruijn graphs with Gephi\n",
+    "\n",
+    "## Assembling linear sequences\n",
+    "\n",
+    "Next: [Summarizing the basics](summarizing-khmer-basics.html)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.5.1"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 0
+}

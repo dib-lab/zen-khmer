@@ -238,9 +238,9 @@ sequencing data. We will discuss this below.</p>
 </div>
 <div class="section" id="How-khmer-works-underneath">
 <h2>How khmer works underneath<a class="headerlink" href="#How-khmer-works-underneath" title="Permalink to this headline">¶</a></h2>
-<p>khmer works by storing k-mers, optionally with abundances, in a a <a class="reference external" href="https://en.wikipedia.org/wiki/Bloom_filter">Bloom
+<p>khmer works by storing k-mers, optionally with abundances, in a <a class="reference external" href="https://en.wikipedia.org/wiki/Bloom_filter">Bloom
 filter</a> or <a class="reference external" href="https://en.wikipedia.org/wiki/Count%E2%80%93min_sketch">CountMin
-sketch</a>
+sketch</a> -
 memory efficient, and fairly fast data structures.</p>
 <p>The details are explored in &#64;citepell and &#64;citeqingpeng, but the basic
 idea is to use a hash table to store presence/absence or abundance
@@ -430,6 +430,8 @@ numerically; you can get the neighbor back as a string with the
 </pre></div>
 </div>
 </div>
+<p>Once you can store k-mers, and find their neighbors, you have the basic
+necessities for working with <em>graphs</em> of k-mers.</p>
 </div>
 <div class="section" id="Where's-the-graph,-then?">
 <h3>Where&#8217;s the graph, then?<a class="headerlink" href="#Where's-the-graph,-then?" title="Permalink to this headline">¶</a></h3>
@@ -504,6 +506,54 @@ k-mers consumed):</p>
 </div>
 </div>
 <p>That, in a nutshell, is what assemblers do.</p>
+<p>Things to mention &#64;CTB:</p>
+<ul class="simple">
+<li>can use reads as index into graphs &amp; for graph paths</li>
+</ul>
+</div>
+<div class="section" id="Working-with-files-and-sequences">
+<h3>Working with files and sequences<a class="headerlink" href="#Working-with-files-and-sequences" title="Permalink to this headline">¶</a></h3>
+<p>You can load sequences from files using the <a class="reference external" href="https://screed.readthedocs.io/">screed
+library</a>. Briefly,</p>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [33]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">screed</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">Nodegraph</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">screed</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;data/reads.fa.gz&#39;</span><span class="p">):</span>
+<span class="o">...</span>    <span class="n">ng</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>This approach gives you lots of easy manipulation of things in Python.
+You can also use the built-in function on graphs, <code class="docutils literal"><span class="pre">consume_fasta</span></code>,
+which returns the number of reads and the number of k-mers consumed:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [34]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">Nodegraph</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">consume_fasta</span><span class="p">(</span><span class="s1">&#39;data/reads.fa.gz&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[34]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>(666, 86580)
+</pre></div>
+</div>
+</div>
+<p>Both screed and khmer will take FASTA and FASTQ files, plain text or
+gzipped or bz2-zipped.</p>
 </div>
 <div class="section" id="Revisiting-a-few-pecularities">
 <h3>Revisiting a few pecularities<a class="headerlink" href="#Revisiting-a-few-pecularities" title="Permalink to this headline">¶</a></h3>
@@ -515,7 +565,7 @@ asking about. In practice, this means you need a starting point.</p>
 <p>Extracting the error rate. The error rate really doesn&#8217;t matter in the
 context of real data.</p>
 <p>Allocating memory up front.</p>
-<p>Next: <a class="reference external" href="manipulating-histograms">Manipulating k-mer abundance
+<p>Next: <a class="reference external" href="manipulating-histograms.html">Manipulating k-mer abundance
 histograms</a></p>
 </div>
 </div>

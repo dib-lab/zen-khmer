@@ -9,7 +9,7 @@ Zen and the art of k-mers (using khmer)
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    using-zaok
    intro
@@ -19,7 +19,6 @@ Contents:
 
    actually-using-khmer.rst
    considerations.rst
-   choosing-parameters.rst
    infrastructure.rst
    off-label-and-emerging-use-cases.rst
 

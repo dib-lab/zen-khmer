@@ -65,19 +65,29 @@
     "sequence data is that all of the *real* paths present in the raw data\n",
     "will be paths in the De Bruijn graph, and that these paths can\n",
     "generally be distinguished from paths created by sequencing errors in\n",
-    "the sequencing data.  We will discuss this below.\n",
-    "\n",
+    "the sequencing data.  We will discuss this below."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "### Sequencing errors, k-mer inflation, and the error catastrophe\n",
     "\n",
     "(solid k-mers, pevzner.)\n",
     "\n",
-    "(weakness in DBG, indels.)\n",
-    "\n",
+    "(weakness in DBG, indels.)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "## How khmer works underneath\n",
     "\n",
-    "khmer works by storing k-mers, optionally with abundances, in a a\n",
+    "khmer works by storing k-mers, optionally with abundances, in a\n",
     "[Bloom filter](https://en.wikipedia.org/wiki/Bloom_filter) or\n",
-    "[CountMin sketch](https://en.wikipedia.org/wiki/Count%E2%80%93min_sketch)\n",
+    "[CountMin sketch](https://en.wikipedia.org/wiki/Count%E2%80%93min_sketch) -\n",
     "memory efficient, and fairly fast data structures.\n",
     "\n",
     "The details are explored in @citepell and @citeqingpeng, but the\n",
@@ -118,8 +128,7 @@
     "of generality in the data structure.  But, because of the growth of\n",
     "data and the error catastrophe in De Bruijn graphs, discussed above,\n",
     "low memory data structures and fast operations have been practically useful\n",
-    "and interesting for real-world data analysis problems.\n",
-    "\n"
+    "and interesting for real-world data analysis problems."
    ]
   },
   {
@@ -133,8 +142,13 @@
     "within our group we almost entirely use the Python API.  This is what\n",
     "the command-line scripts and all the tests also use.\n",
     "\n",
-    "Below, we explore some of the basic concepts in khmer.\n",
-    "\n",
+    "Below, we explore some of the basic concepts in khmer."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "### Basic k-mer storage: `Nodegraph` and `Countgraph`\n",
     "\n",
     "To store a k-mer, you first create a Nodegraph or a Countgraph,\n",
@@ -330,6 +344,13 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
+    "Once you can store k-mers, and find their neighbors, you have the basic necessities for working with *graphs* of k-mers."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "### Where's the graph, then?\n",
     "\n",
     "This simple concept of \"storing k-mers\" can be used to do a bunch of\n",
@@ -440,6 +461,75 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
+    "Things to mention @CTB:\n",
+    "\n",
+    "* can use reads as index into graphs & for graph paths"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Working with files and sequences\n",
+    "\n",
+    "You can load sequences from files using the [screed library](https://screed.readthedocs.io/).  Briefly,"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    ">>> import screed\n",
+    ">>> ng = khmer.Nodegraph(K, 1e6, 4)\n",
+    ">>> for record in screed.open('data/reads.fa.gz'):\n",
+    "...    ng.consume(record.sequence)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "This approach gives you lots of easy manipulation of things in Python.  You can also use the built-in function on graphs, `consume_fasta`, which returns the number of reads and the number of k-mers consumed:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(666, 86580)"
+      ]
+     },
+     "execution_count": 34,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    ">>> ng = khmer.Nodegraph(K, 1e6, 4)\n",
+    ">>> ng.consume_fasta('data/reads.fa.gz')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Both screed and khmer will take FASTA and FASTQ files, plain text or gzipped or bz2-zipped."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "### Revisiting a few pecularities\n",
     "\n",
     "Because of the memory-efficient way that khmer stores k-mers, the\n",
@@ -452,9 +542,14 @@
     "Extracting the error rate.\n",
     "The error rate really doesn't matter in the context of real data.\n",
     "\n",
-    "Allocating memory up front.\n",
-    "\n",
-    "Next: [Manipulating k-mer abundance histograms](manipulating-histograms)"
+    "Allocating memory up front."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Next: [Manipulating k-mer abundance histograms](manipulating-histograms.html)"
    ]
   }
  ],

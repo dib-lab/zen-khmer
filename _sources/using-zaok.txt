@@ -40,3 +40,23 @@ Third, you can take advantage of `mybinder <http://mybinder.org>`__ and
 run it there, by clicking::
 
   ...
+
+Building the full documentation yourself
+========================================
+
+The documentation source (reStructuredText + Jupyter Notebooks) is in
+the GitHub repository is http://github.com/dib-lab/zaok.git
+
+To build it all, you'll need to install sphinx, as well as the stuff
+in requirements.txt.
+
+Then run::
+
+  make html
+
+and look in ``_build/html/`` for the output.
+
+The GitHub pages site hosted at https://dib-lab.github.io/zen-khmer/
+is in the gh-pages/ branch at https://github.com/dib-lab/zen-khmer.
+(We do it this way to avoid having to switch branches to update the
+docs.)

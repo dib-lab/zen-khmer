@@ -1,6 +1,6 @@
-======================================
-Larger perspectives and considerations
-======================================
+===============================
+Perspectives and considerations
+===============================
 
 Avoid assembling as long as possible
 ====================================
