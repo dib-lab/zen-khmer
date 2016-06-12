@@ -1,0 +1,34 @@
+.. zaok documentation master file, created by
+   sphinx-quickstart on Mon Jun  6 17:10:55 2016.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Zen and the art of k-mers (using khmer)
+=======================================
+
+Contents:
+
+.. toctree::
+   :maxdepth: 2
+
+   using-zaok
+   intro
+   manipulating-histograms
+   exploring-graphs
+   summarizing-khmer-basics
+
+   actually-using-khmer.rst
+   considerations.rst
+   choosing-parameters.rst
+   infrastructure.rst
+   off-label-and-emerging-use-cases.rst
+
+   blog-posts.rst
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+

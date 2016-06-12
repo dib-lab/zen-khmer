@@ -1,0 +1,543 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Introduction &mdash; zaok 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="zaok 0.1 documentation" href="index.html" />
+    <link rel="next" title="Manipulating k-mer abundance spectra" href="manipulating-histograms.html" />
+    <link rel="prev" title="Preface - using this documentation" href="using-zaok.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>zaok 0.1 documentation</span></a></h1>
+        <h2 class="heading"><span>Introduction</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="using-zaok.html">Preface - using this documentation</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="manipulating-histograms.html">Manipulating k-mer abundance spectra</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput > div,
+div.nbinput div[class^=highlight],
+div.nbinput div[class^=highlight] pre,
+div.nboutput,
+div.nboutput > div,
+div.nboutput div[class^=highlight],
+div.nboutput div[class^=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class^=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput > :first-child pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput > :first-child pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput > :first-child[class^=highlight],
+div.nboutput > :first-child[class^=highlight],
+div.nboutput > :first-child {
+    min-width: 11ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+
+/* input/output area */
+div.nbinput > :nth-child(2)[class^=highlight],
+div.nboutput > :nth-child(2),
+div.nboutput > :nth-child(2)[class^=highlight] {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+
+/* input area */
+div.nbinput > :nth-child(2)[class^=highlight] {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput  > :nth-child(2).stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-bold { font-weight: bold; }
+</style>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;/Users/t/dev/khmer&#39;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">khmer</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Introduction">
+<h1>Introduction<a class="headerlink" href="#Introduction" title="Permalink to this headline">¶</a></h1>
+<p>khmer is a toolkit for fast, low-memory examination of k-mers and De
+Bruijn graphs, as well as manipulation of shotgun sequencing reads.</p>
+<p>khmer started with one simple idea: memory efficient storage of k-mers
+is useful. But, because De Bruijn graphs are based on k-mers, and De
+Bruijn graphs are one simply and unifying way to look at lots of DNA
+sequencing data, khmer has grown in utility.</p>
+<div class="section" id="DNA,-k-mers,-and-graphs">
+<h2>DNA, k-mers, and graphs<a class="headerlink" href="#DNA,-k-mers,-and-graphs" title="Permalink to this headline">¶</a></h2>
+<p>Imagine a strand of DNA whose sequence has no repeats at a given k-mer
+size - that is, for a specific k-mer size (say <span class="math">\(k_0 = 21\)</span>), each
+k-mer that is present in the strand of DNA occurs exactly once.</p>
+<p>If you decrease k from k_0 enough, you will eventually find a repeated
+k-mer (consider a k of 1). If you increase k beyond k_0, you will never
+find a repeated k-mer.</p>
+<p>You can build an explicit graph from the k-mers in the sequence by
+constructing nodes from the k-mers and edges between the nodes as k-1
+overlaps; this graph can also be built with overlaps as nodes and k-mers
+as edges.</p>
+<p>(picture)</p>
+<p>You can also build an <em>implicit</em> graph from the k-mers by simply
+recording all of the k-mers, and then dynamically finding all possible
+neighboring nodes by searching for all k-1 overlaps; for a DNA De Bruijn
+graph, there are never more than 4 possible prefixes and 4 possible
+suffixes. For long enough k, there will be no false edges.</p>
+<p>The advantage of the implicit graph is that tracking the edges requires
+memory, while merely tracking the nodes can be done with minimal
+expense.</p>
+<p>(Mention sparseness and k in context of initial paper.)</p>
+<p>(Discuss distributed, and what &#8220;expensive&#8221; means.)</p>
+<p>(Connect to Medjedev paper, and Rizk paper.)</p>
+<p>The core utility of the De Bruijn graph approach to representing
+sequence data is that all of the <em>real</em> paths present in the raw data
+will be paths in the De Bruijn graph, and that these paths can generally
+be distinguished from paths created by sequencing errors in the
+sequencing data. We will discuss this below.</p>
+<div class="section" id="Sequencing-errors,-k-mer-inflation,-and-the-error-catastrophe">
+<h3>Sequencing errors, k-mer inflation, and the error catastrophe<a class="headerlink" href="#Sequencing-errors,-k-mer-inflation,-and-the-error-catastrophe" title="Permalink to this headline">¶</a></h3>
+<p>(solid k-mers, pevzner.)</p>
+<p>(weakness in DBG, indels.)</p>
+</div>
+</div>
+<div class="section" id="How-khmer-works-underneath">
+<h2>How khmer works underneath<a class="headerlink" href="#How-khmer-works-underneath" title="Permalink to this headline">¶</a></h2>
+<p>khmer works by storing k-mers, optionally with abundances, in a a <a class="reference external" href="https://en.wikipedia.org/wiki/Bloom_filter">Bloom
+filter</a> or <a class="reference external" href="https://en.wikipedia.org/wiki/Count%E2%80%93min_sketch">CountMin
+sketch</a>
+memory efficient, and fairly fast data structures.</p>
+<p>The details are explored in &#64;citepell and &#64;citeqingpeng, but the basic
+idea is to use a hash table to store presence/absence or abundance
+information without paying attention to collisions. (&#64;&#64;discuss false
+positive rate)</p>
+<p>These data structures are:</p>
+<ul class="simple">
+<li>simple - the core ideas of khmer can be reimplemented in under a few
+dozens lines of simple code.</li>
+<li>fast - most queries involve hashing a few numbers and doing a direct
+lookup into a large table for each hash.</li>
+<li>memory-efficient: for sparse data sets (where most k-mers are not
+present), these data structures turn out to be incredibly efficient.</li>
+<li>constant memory: you must allocate the data structures entirely at
+the beginning.</li>
+<li>online: you can query for the presence/absence and abundance of
+k-mers at any point.</li>
+</ul>
+<p>In exchange we give up a few things:</p>
+<ul class="simple">
+<li>elements cannot be directly removed from Bloom filters.</li>
+<li>elements are also anonymous and must be accessed with a handle (that
+is, you must know what k-mer you are looking for; you can&#8217;t retrieve
+all stored k-mers).</li>
+</ul>
+<p>and probably a few other items I&#8217;m missing here...</p>
+<p>There are a number of approaches we could take to ameliorate the
+problems, but we have been able to work around the problems so far.</p>
+<p>Essentially, the tradeoff is a few cheap/easy operations against loss of
+generality in the data structure. But, because of the growth of data and
+the error catastrophe in De Bruijn graphs, discussed above, low memory
+data structures and fast operations have been practically useful and
+interesting for real-world data analysis problems.</p>
+</div>
+<div class="section" id="A-hands-on-exploration">
+<h2>A hands-on exploration<a class="headerlink" href="#A-hands-on-exploration" title="Permalink to this headline">¶</a></h2>
+<p>khmer is written in C++ with a Python wrapping; while the underlying C++
+code is directly usable, it&#8217;s not very mature. This is because within
+our group we almost entirely use the Python API. This is what the
+command-line scripts and all the tests also use.</p>
+<p>Below, we explore some of the basic concepts in khmer.</p>
+<div class="section" id="Basic-k-mer-storage:-Nodegraph-and-Countgraph">
+<h3>Basic k-mer storage: <code class="docutils literal"><span class="pre">Nodegraph</span></code> and <code class="docutils literal"><span class="pre">Countgraph</span></code><a class="headerlink" href="#Basic-k-mer-storage:-Nodegraph-and-Countgraph" title="Permalink to this headline">¶</a></h3>
+<p>To store a k-mer, you first create a Nodegraph or a Countgraph, and give
+it a k-mer size and some other parameters (discussed below).</p>
+<p>Let&#8217;s start with a k-mer size of 7:</p>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">K</span> <span class="o">=</span> <span class="mi">7</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">kmer</span> <span class="o">=</span> <span class="s1">&#39;ATGGATG&#39;</span>
+</pre></div>
+</div>
+</div>
+<p>A Nodegraph stores the presence or absence of k-mers, without keeping
+track of their count:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">Nodegraph</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kmer</span><span class="p">)</span>
+<span class="mi">0</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">kmer</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kmer</span><span class="p">)</span>
+<span class="mi">1</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">kmer</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kmer</span><span class="p">)</span>
+<span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[11]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>1
+</pre></div>
+</div>
+</div>
+<p>A Countgraph stores the count of k-mers, up to 255 (8 bits).</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">cg</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">Countgraph</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kmer</span><span class="p">)</span>
+<span class="mi">0</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">kmer</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kmer</span><span class="p">)</span>
+<span class="mi">1</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">kmer</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kmer</span><span class="p">)</span>
+<span class="mi">2</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[12]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>2
+</pre></div>
+</div>
+</div>
+<p>In either case, we can ask for all of the neighboring nodes in the
+graph, which, in this case, will be none &#8211;</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">cg</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">kmer</span><span class="p">)</span>
+<span class="p">[]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[13]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>[]
+</pre></div>
+</div>
+</div>
+<p>If we add an adjoining k-mer, though &#8211;</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">cg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">kmer</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="s1">&#39;G&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cg</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">kmer</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">5555</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[14]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>[5555]
+</pre></div>
+</div>
+</div>
+<p>we&#8217;ll get back a neighbor. Here, the neighbor is represented
+numerically; you can get the neighbor back as a string with the
+<code class="docutils literal"><span class="pre">reverse_hash</span></code> method:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [17]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">ns</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">kmer</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cg</span><span class="o">.</span><span class="n">reverse_hash</span><span class="p">(</span><span class="n">ns</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="s1">&#39;TGGATGG&#39;</span>
+
+<span class="c1"># @CTB note that forward and reverse are collapsed</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[17]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>&#39;TGGATGG&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Where's-the-graph,-then?">
+<h3>Where&#8217;s the graph, then?<a class="headerlink" href="#Where's-the-graph,-then?" title="Permalink to this headline">¶</a></h3>
+<p>This simple concept of &#8220;storing k-mers&#8221; can be used to do a bunch of
+useful things - for example, assembly.</p>
+<p>Let&#8217;s start with a larger K, to avoid repeats &#8211;</p>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [18]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">K</span> <span class="o">=</span> <span class="mi">21</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">Nodegraph</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>&#64;&#64;traverse?</p>
+<p>Now, suppose we have a sequence longer than K:</p>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [20]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">seq</span> <span class="o">=</span> <span class="s1">&#39;CCCTGTTAGCTACGTCCGTCTAAGGATATTAACATAGTTGCGACTGCGTCCTGTGCTCA&#39;</span>
+</pre></div>
+</div>
+</div>
+<p>We can add it to the graph with <code class="docutils literal"><span class="pre">consume</span></code> (which returns the number of
+k-mers consumed):</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [27]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[27]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>39
+</pre></div>
+</div>
+</div>
+<p>and we can now traverse it from one end to the other like so:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [28]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">start_kmer</span> <span class="o">=</span> <span class="n">seq</span><span class="p">[:</span><span class="n">K</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">assemble_linear_path</span><span class="p">(</span><span class="n">start_kmer</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[28]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>&#39;TGAGCACAGGACGCAGTCGCAACTATGTTAATATCCTTAGACGGACGTAGCTAACAGGG&#39;
+</pre></div>
+</div>
+</div>
+<p>That, in a nutshell, is what assemblers do.</p>
+</div>
+<div class="section" id="Revisiting-a-few-pecularities">
+<h3>Revisiting a few pecularities<a class="headerlink" href="#Revisiting-a-few-pecularities" title="Permalink to this headline">¶</a></h3>
+<p>Because of the memory-efficient way that khmer stores k-mers, the
+Nodegraph and Countgraph structures don&#8217;t actually keep track of the
+actual k-mer; this means you can&#8217;t ask the data structures for a list of
+the k-mers they contain. So you always have to know what k-mer you&#8217;re
+asking about. In practice, this means you need a starting point.</p>
+<p>Extracting the error rate. The error rate really doesn&#8217;t matter in the
+context of real data.</p>
+<p>Allocating memory up front.</p>
+<p>Next: <a class="reference external" href="manipulating-histograms">Manipulating k-mer abundance
+histograms</a></p>
+</div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="using-zaok.html">Preface - using this documentation</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="manipulating-histograms.html">Manipulating k-mer abundance spectra</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, C. Titus Brown.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

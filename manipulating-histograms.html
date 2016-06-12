@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Manipulating k-mer abundance spectra &mdash; zaok 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="zaok 0.1 documentation" href="index.html" />
+    <link rel="next" title="Exploring graphs and graph structure" href="exploring-graphs.html" />
+    <link rel="prev" title="Introduction" href="intro.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>zaok 0.1 documentation</span></a></h1>
+        <h2 class="heading"><span>Manipulating k-mer abundance spectra</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="intro.html">Introduction</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="exploring-graphs.html">Exploring graphs and graph structure</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="manipulating-k-mer-abundance-spectra">
+<h1>Manipulating k-mer abundance spectra<a class="headerlink" href="#manipulating-k-mer-abundance-spectra" title="Permalink to this headline">¶</a></h1>
+<p>Let&#8217;s turn to the question of k-mer abundances.</p>
+<p>Suppose you have 500x coverage of a 1kb single-copy linear DNA
+sequence in 100 bp reads.  On average, with truly random and uniform
+sampling, you would see every base in the true sequence 500 times,
+with about half more frequently and half less frequently.
+You could measure this quite easily with mapping - simply map
+all the reads to the linear sequence, and then count the
+number of times each base is covered by a read.</p>
+<p>%%</p>
+<p>If, however, you don&#8217;t know the true sequence, you can still estimate
+the coverage by looking at the histogram of k-mer abundances, or
+k-mer abundance spectrum:</p>
+<p>%%</p>
+<p>Here, there are two peaks: one is the peak of true k-mer abundances,
+which is around 400.  The other is the set of erroneous k-mers
+resulting from sequencing errors.  The intuition is simple: in
+general, erroneous k-mers will only show up a few times, while k-mers
+that are generated from sampling true sequence will show up many
+times.</p>
+<p>If we color the true k-mers blue and the erroneous k-mers red, this is
+quite clear:</p>
+<p>%%</p>
+<p>This split in abundance peaks lets us do error analysis and trimming.</p>
+<p>For example, errors can readily be identified in reads by looking at the first
+location where a low-abundance k-mer appears:</p>
+<p>&gt;&gt;</p>
+<p>And, of course, you can simply remove all the low-abundance k-mers from
+reads altogether, leaving only the high-abundance k-mers:</p>
+<p>%% show distribution, k-mer counts</p>
+<p>This has the advantage of dramatically simplifying several issues: first,
+you don&#8217;t have nearly as many k-mers to keep track of, which can decrease
+the total amount of memory needed to process the reads in another ways; and
+second, assembly itself becomes much simpler if you are dealing with
+only correct k-mers, because then only repeats are problematic.</p>
+<p>&#64;&#64;identify and mask low-abundance k-mers</p>
+<p>If you plot the k-mer abundance spectrum of the trimmed k-mers against the
+abundance spectrum of the whole data set, you will see that in effect we&#8217;ve
+shifted the abundance spectrum left - this is because we are trimming reads
+at low-abundance k-mers and discarding the remainder of the reads,
+rather than simply ignoring the low abundance k-mers.</p>
+<p>What else can we do with k-mer abundance spectra?</p>
+<div class="section" id="variable-coverage-error-trimming">
+<h2>Variable coverage error trimming<a class="headerlink" href="#variable-coverage-error-trimming" title="Permalink to this headline">¶</a></h2>
+<p>The above approach of identifying low-abundance k-mers as errors works
+well in situations where you have high, uniform coverage of the
+molecules in your sample. This is possible to achieve with genomes by
+doing deep enough sequencing because the single copy sequence will be
+represented uniformly.  But what about transcriptomes and metagenomes
+and MD-amplified samples?  Any such samples of sufficient diversity
+will have both high-abundance components and low-abundance components.</p>
+<p>For example, consider a two-species metagenome, where one species
+(species A) is present at 100x the abundance of the other.  If we
+sequence species A to 500x, species B will still only be present
+at 5x within the sample:</p>
+<p>%%</p>
+<p>If we abundance trim at k-mers with abundance 3 as above, we&#8217;ll eliminate
+almost all of the real data from species B, along with many of the errors
+in species A.</p>
+<p>%%</p>
+<p>There&#8217;s an additional problem, too: deep sequencing of highly abundant
+molecules will yield erroneous k-mers with abundance &gt; 3.</p>
+<p>What we need to do here is apply a cutoff that takes into account the
+local abundance of the read.  While this may not be something that we
+know, we can estimate it on a per-read basis by looking at the other
+k-mers in the read &#8211; for example, if most of the k-mers in a read are
+high abundance in the overall data set, then probably the read itself
+is high abundance and any low-abundance k-mers in it are erroneous.</p>
+<p>Practically speaking, we can guess the abundance of a read by using
+the median k-mer abundance of the k-mers in a read with respect to the
+overall k-mer spectrum.  We can then choose our trimming cutoff so
+that k-mers outside the natural sampling spread of k-mers within the
+read are identified as errors:</p>
+<p>&#64;&#64;use ratio?
+%%</p>
+<p>This has the effect of trimming off many errors for the high abundance
+reads, and trimming effectively no low-abundance reads.  This is OK:
+it&#8217;s very hard to recover data you&#8217;ve eliminated, and for
+low-abundance reads, we must simply remain unsure of the distinction
+between &#8220;true&#8221; and erroneous k-mers.</p>
+<p>Underlying all of this, what we are really trying to do is estimate
+whether or not a k-mer belongs to one of two Poisson distributions:
+the &#8220;true k-mer&#8221; Poisson distribution, or the &#8220;erroneous k-mer&#8221; Poisson
+distribution.  For each true k-mer, an erroneous k-mer occurs at
+1/(k*3)th... so you&#8217;re essentially sampling from...</p>
+</div>
+<div class="section" id="estimating-per-read-coverage-more-generally">
+<h2>Estimating per-read coverage, more generally<a class="headerlink" href="#estimating-per-read-coverage-more-generally" title="Permalink to this headline">¶</a></h2>
+<p>The ability to estimate a read&#8217;s coverage by looking at k-mer
+abundances is pretty handy, because you can do it reference free and
+therefore you can use it to extract <em>reads</em> from data sets without
+assembling</p>
+<p>(You can&#8217;t use k-mer spectra alone to extract reads, because a read
+may have a mixture of high and low abundance k-mers in it.)</p>
+<p>For example, in the situation above with two species, it is easy to
+extract all of the reads that belong to the high abundance species,
+species A &#8211; simply take any read with an estimated abundance greater
+than 50.</p>
+<p>%%</p>
+<p>There may be other things you can do here too.</p>
+</div>
+<div class="section" id="normalizing-read-coverages">
+<h2>Normalizing read coverages<a class="headerlink" href="#normalizing-read-coverages" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s consider the situation above with two species A and B.  A is
+kind of a problem &#8211; the bulk of the sequencing data is from A, and
+we don&#8217;t really need 500x coverage to recover the true genome of A.</p>
+<p>We could slice the reads out by coverage, and then subsample the
+reads down to a coverage of 50 or 100 &#8211;</p>
+<p>%%</p>
+<p>&#64;&#64;hmmmm....</p>
+<p>but it turns out we can do something that&#8217;s effectively the same but
+much more efficient: we can collect only the low-coverage reads, and
+discard any high-coverage reads altogether.</p>
+<p>%%</p>
+<p>This is known as &#8220;digital normalization&#8221; of sequencing data, and it&#8217;s
+an efficient and effective way to eliminate redundant sequencing data.</p>
+<p>(When do we discuss online processing and graphs?)</p>
+<p>It also has the effect of reducing the error content of data all on its
+own &#8211; because we are discarding reads, we are also discarding errors
+in those reads.</p>
+</div>
+<div class="section" id="is-the-true-sequence-still-present">
+<h2>Is the true sequence still present?<a class="headerlink" href="#is-the-true-sequence-still-present" title="Permalink to this headline">¶</a></h2>
+<p>With all of these manipulations to remove errors and redundancy in
+sequencing data sets, it is always nice to check that our beginning
+principle holds true - that the k-mers of the true genomic sequence
+remain in the data set.</p>
+<p>A simple way to do that (in simulated data) is to use the abundance
+histogram functionality to look to see how many true k-mers are
+present in the read data set.</p>
+<p>%%</p>
+<p>Next: <a class="reference internal" href="exploring-graphs.html"><span class="doc">Exploring graphs and graph structure</span></a></p>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="intro.html">Introduction</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="exploring-graphs.html">Exploring graphs and graph structure</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, C. Titus Brown.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

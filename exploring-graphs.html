@@ -1,0 +1,253 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Exploring graphs and graph structure &mdash; zaok 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="zaok 0.1 documentation" href="index.html" />
+    <link rel="next" title="Summarizing the basics" href="summarizing-khmer-basics.html" />
+    <link rel="prev" title="Manipulating k-mer abundance spectra" href="manipulating-histograms.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>zaok 0.1 documentation</span></a></h1>
+        <h2 class="heading"><span>Exploring graphs and graph structure</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="manipulating-histograms.html">Manipulating k-mer abundance spectra</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="summarizing-khmer-basics.html">Summarizing the basics</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="exploring-graphs-and-graph-structure">
+<h1>Exploring graphs and graph structure<a class="headerlink" href="#exploring-graphs-and-graph-structure" title="Permalink to this headline">¶</a></h1>
+<p>Graphs can be a tremendously powerful way to look at sequencing data,
+but unlike k-mers, operating on graphs can be very computationally
+expensive.  This is largely because of combinatorics: for example,
+forks and loops in the graph make simple traversal expensive.  Some of
+khmer&#8217;s functionality is aimed at simplifying, or at least making possible,
+some basic traversal approaches.</p>
+<div class="section" id="building-waypoints-in-de-bruijn-graphs">
+<h2>Building waypoints in De Bruijn graphs<a class="headerlink" href="#building-waypoints-in-de-bruijn-graphs" title="Permalink to this headline">¶</a></h2>
+<p>khmer provides a technique called &#8216;tagging&#8217;, in which a subset of
+k-mers in the graph are chosen as representatives of the whole graph -
+and we choose these representatives so that <em>every</em> k-mer in the
+entire graph is within distance D of at least one representative.</p>
+<p>(khmer does this by using the reads as a guide into the graph;khmer
+makes sure that each read has a tag every D k-mers, and, since the
+graph is entirely constructed from reads, then the graph ends up being
+tagged at distance D as well.)</p>
+<p>Tagging has a few nice features:</p>
+<ul class="simple">
+<li>there are many fewer tags than there are k-mers (2D fold fewer,
+approximately.)</li>
+<li>the structure and connectivity of the tags serves as a good proxy
+for the connectivity of the overall graph; in this way they serve
+as a sort of sparse graph.</li>
+<li>tags are somewhat refractory to coverage: highly covered regions will
+get many fewer tags than the number of reads from that region.</li>
+<li>tags provide a good entry point into the graph for traversal; in essense,
+they provide waypoints for other work.</li>
+<li>tags could, in theory, be used as an index into the reads. (&#64;CTB expand.)</li>
+</ul>
+<p>Graph theory friends tell me that this is actually a D-dominating set,
+and we&#8217;ll revisit this concept later on (c.f. spacegraphcats).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Right now we don&#8217;t do a very efficient job of creating the tags.
+I have a few ideas for improving this using streaming approaches.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Our tag data structure implementation is pretty bad - we use an STL set
+to store the tags...</p>
+</div>
+<p>To make use of tags, the tags need to be built first.  Here&#8217;s an example.</p>
+<p>First, construct a Nodegraph:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">K</span> <span class="o">=</span> <span class="mi">21</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ng</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">Nodegraph</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create a sequence longer than K:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="s1">&#39;CCCTGTTAGCTACGTCCGTCTAAGGATATTAACATAGTTGCGACTGCGTCCTGTGCTCA&#39;</span>
+</pre></div>
+</div>
+<p>Now, instead of adding it to <code class="docutils literal"><span class="pre">ng</span></code> with <code class="docutils literal"><span class="pre">consume</span></code>, use <code class="docutils literal"><span class="pre">consume_and_tag</span></code>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ng</span><span class="o">.</span><span class="n">consume_and_tag</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can now look at the tags with <code class="docutils literal"><span class="pre">get_tags_and_positions</span></code>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ng</span><span class="o">.</span><span class="n">get_tags_and_positions</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>[(19, 156582046028), (39, 1984875433400)]</p>
+<p>Here, the first element of each tuple is the position of the tag
+within the sequence, and the second element is the actual tag &#8211; you
+can convert those back into DNA with <code class="docutils literal"><span class="pre">reverse_hash</span></code>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">ng</span><span class="o">.</span><span class="n">get_tags_and_positions</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ng</span><span class="o">.</span><span class="n">reverse_hash</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>AACTATGTTAATATCCTTAGA</p>
+<p>Points to make:</p>
+<ul class="simple">
+<li>you can use any query sequence you want, not just the one you used to
+create the tags ;).</li>
+<li>the tagging distance D is 40 by default, and can be adjusted with
+<code class="docutils literal"><span class="pre">_set_tag_density</span></code>.</li>
+</ul>
+</div>
+<div class="section" id="partitioning">
+<h2>Partitioning<a class="headerlink" href="#partitioning" title="Permalink to this headline">¶</a></h2>
+<p>The motivation behind tags came from a desire to <em>partition</em> data sets:
+back when, our intution was that metagenome data sets should split up
+into disconnected components based on their origin species.  (You can
+read more in Pell et al., 2012. &#64;cite.)</p>
+<p>This is challenging because you essentially want an all-by-all connectivity
+map for the graph - you want to know, does read A connect (transitively)
+to read Z, by any path, and you want to know this for all the reads in the
+data set.  This is hard!</p>
+<p>We initially developed tagging for the purpose of partitioning, and we
+do the following:</p>
+<ul class="simple">
+<li>tag the graph systematically (as explained above);</li>
+<li>explore to a distance D from each tag, and identify all neighboring
+tags within distance D;</li>
+<li>assign partition IDs to each set of connected tags;</li>
+<li>split the reads up based on their partition IDs.</li>
+</ul>
+<p>This does work, mostly, and it turns out to split the graph up into
+bins that group reads by species. &#64;&#64;more here.</p>
+<p>For an example of partitioning, let&#8217;s construct an artifical sequence.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">longseq</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;AGGAGGAGCATTTGTGCGATGCCCTATGGGGAGACCTATCTGCCGGGGAAATGCGCACA&quot;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="s2">&quot;TAACATAATCTAATCTACCACATTATGAACCCCCAGTGGGCACGTGTTCATTGCGTACGATCGCATTC&quot;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="s2">&quot;TACTTGATTCCCGCAGTGGTACGACGCTATGTA&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">longseq</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">longseq</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If we break this 160-bp sequence up into three bits,</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">begin</span> <span class="o">=</span> <span class="n">longseq</span><span class="p">[:</span><span class="mi">70</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">middle</span> <span class="o">=</span> <span class="n">longseq</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">120</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">end</span> <span class="o">=</span> <span class="n">longseq</span><span class="p">[</span><span class="mi">90</span><span class="p">:]</span>
+</pre></div>
+</div>
+<p>we can see that <code class="docutils literal"><span class="pre">begin</span></code> and <code class="docutils literal"><span class="pre">end</span></code> shouldn&#8217;t connect without <code class="docutils literal"><span class="pre">middle</span></code>.
+Let&#8217;s see if partitioning agrees!</p>
+<p>First, let&#8217;s build a graph and then add the beginning and end bits:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">K</span> <span class="o">=</span> <span class="mi">21</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ng</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">Nodegraph</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ng</span><span class="o">.</span><span class="n">consume_and_tag</span><span class="p">(</span><span class="n">begin</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ng</span><span class="o">.</span><span class="n">consume_and_tag</span><span class="p">(</span><span class="n">end</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, run the partitioning code, get back a partition object, and ask
+for a partition count:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">ng</span><span class="o">.</span><span class="n">do_subset_partition</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n_partitions</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">count_partitions</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">n_partitions</span><span class="p">)</span>
+<span class="go">2</span>
+</pre></div>
+</div>
+<p>Yep - 2 partitions!</p>
+<p>Now let&#8217;s add the middle bit, which will connect the two isolated partitions:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ng</span><span class="o">.</span><span class="n">consume_and_tag</span><span class="p">(</span><span class="n">middle</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If we redo the partitioning, we should now get 1 partition:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">ng</span><span class="o">.</span><span class="n">do_subset_partition</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n_partitions</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">count_partitions</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">n_partitions</span><span class="p">)</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+<p>...and we do!</p>
+<p>Partitioning hasn&#8217;t, in the end, proven to be that useful in practice.
+The downsides of the approach are:</p>
+<ul class="simple">
+<li>it turns out that any source of systematic bias in sequencing will
+result in a completely connected graph (&#64;cite); such biases are
+common.</li>
+<li>it also turns out that most metagenome graphs are, in reality,
+completely connected.</li>
+</ul>
+<p>However, tags are still potentially useful for other things than straight
+up partitioning.</p>
+</div>
+<div class="section" id="labeling-graphs">
+<h2>Labeling graphs<a class="headerlink" href="#labeling-graphs" title="Permalink to this headline">¶</a></h2>
+<p>Camille Scott extended tagging with <em>labels</em> - the idea is that
+each tag can be labelled with 1 or more arbitrary identifiers.
+This lets you do things like build colored De Bruijn graphs,
+equiv. do pangenome analysis.</p>
+<p>References:</p>
+<p><a class="reference external" href="http://ivory.idyll.org/blog/2015-wok-labelhash.html">http://ivory.idyll.org/blog/2015-wok-labelhash.html</a></p>
+<p><a class="reference external" href="https://github.com/dib-lab/2015-khmer-wok4-multimap/blob/master/do-counting.py">https://github.com/dib-lab/2015-khmer-wok4-multimap/blob/master/do-counting.py</a></p>
+</div>
+<div class="section" id="building-compact-de-bruijn-graphs">
+<h2>Building compact De Bruijn graphs<a class="headerlink" href="#building-compact-de-bruijn-graphs" title="Permalink to this headline">¶</a></h2>
+<p>De Bruijn graphs themselves are often quite large, because they have
+as many nodes in them as there are unique k-mers in the data set.
+Many of these k-mers may be collapsable into linear paths.  The result
+of doing this graph contraction is called a &#8220;compact De Bruijn graph&#8221;,
+and we have some functionality for building them in khmer.</p>
+<p>This functionality consists of two functions on graphs:
+<code class="docutils literal"><span class="pre">find_high_degree_nodes</span></code> and <code class="docutils literal"><span class="pre">traverse_and_mark_linear_paths</span></code>.</p>
+<p>There&#8217;s a script sandbox/extract-compact-dbg.py.</p>
+</div>
+<div class="section" id="visualizing-compact-de-bruijn-graphs-with-gephi">
+<h2>Visualizing compact De Bruijn graphs with Gephi<a class="headerlink" href="#visualizing-compact-de-bruijn-graphs-with-gephi" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="assembling-linear-sequences">
+<h2>Assembling linear sequences<a class="headerlink" href="#assembling-linear-sequences" title="Permalink to this headline">¶</a></h2>
+<p>Next: <a class="reference internal" href="summarizing-khmer-basics.html"><span class="doc">Summarizing the basics</span></a></p>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="manipulating-histograms.html">Manipulating k-mer abundance spectra</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="summarizing-khmer-basics.html">Summarizing the basics</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, C. Titus Brown.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,216 @@
+============
+Introduction
+============
+
+khmer is a toolkit for fast, low-memory examination of k-mers and De
+Bruijn graphs, as well as manipulation of shotgun sequencing reads.
+
+khmer started with one simple idea: memory efficient storage of k-mers
+is useful.  But, because De Bruijn graphs are based on k-mers, and
+De Bruijn graphs are one simply and unifying way to look at lots of
+DNA sequencing data, khmer has grown in utility.
+
+DNA, k-mers, and graphs
+=======================
+
+Imagine a strand of DNA whose sequence has no repeats at a given k-mer
+size - that is, for a specific k-mer size (say $k_0 = 21$), each k-mer
+that is present in the strand of DNA occurs exactly once.
+
+If you decrease k from k_0 enough, you will eventually find a repeated
+k-mer (consider a k of 1).  If you increase k beyond k_0, you will
+never find a repeated k-mer.
+
+You can build an explicit graph from the k-mers in the sequence by
+constructing nodes from the k-mers and edges between the nodes as
+k-1 overlaps; this graph can also be built with overlaps as nodes
+and k-mers as edges.
+
+(picture)
+
+You can also build an *implicit* graph from the k-mers by simply
+recording all of the k-mers, and then dynamically finding all possible
+neighboring nodes by searching for all k-1 overlaps; for a DNA De
+Bruijn graph, there are never more than 4 possible prefixes and 4
+possible suffixes.  For long enough k, there will be no false
+edges.
+
+The advantage of the implicit graph is that tracking the edges requires
+memory, while merely tracking the nodes can be done with minimal expense.
+
+(Mention sparseness and k in context of initial paper.)
+
+(Discuss distributed, and what "expensive" means.)
+
+(Connect to Medjedev paper, and Rizk paper.)
+
+The core utility of the De Bruijn graph approach to representing
+sequence data is that all of the *real* paths present in the raw data
+will be paths in the De Bruijn graph, and that these paths can
+generally be distinguished from paths created by sequencing errors in
+the sequencing data.  We will discuss this below.
+
+Sequencing errors, k-mer inflation, and the error catastrophe
+=============================================================
+
+(solid k-mers, pevzner.)
+
+(weakness in DBG, indels.)
+
+How khmer works underneath
+==========================
+
+khmer works by storing k-mers, optionally with abundances, in a a
+`Bloom filter <https://en.wikipedia.org/wiki/Bloom_filter>`__ or
+`CountMin sketch
+<https://en.wikipedia.org/wiki/Count%E2%80%93min_sketch>`__ - simple,
+memory efficient, and fairly fast data structures.
+
+The details are explored in @citepell and @citeqingpeng, but the
+basic idea
+
+These data structures are:
+
+* simple - the core ideas of khmer can be reimplemented in under a few dozens
+  lines of simple code.
+
+* fast - most queries involve hashing a few numbers and doing a direct lookup
+  into a large table for each hash.
+
+* memory-efficient: for sparse data sets (where most k-mers are not present),
+  these data structures turn out to be incredibly efficient.
+
+* constant memory: you must allocate the data structures entirely at the
+  beginning.
+
+* online: you can query for the presence/absence and abundance of k-mers at
+  any point.
+
+In exchange we give up a few things:
+
+* elements cannot be directly removed from Bloom filters.
+
+* elements are also anonymous and must be accessed with a handle (that is,
+  you must know what k-mer you are looking for; you can't retrieve all
+  stored k-mers).
+
+and probably a few other items I'm missing here...
+
+There are a number of approaches we could take to ameliorate the
+problems, but we have been able to work around the problems so far.
+
+Essentially, the tradeoff is a few cheap/easy operations against loss
+of generality in the data structure.  But, because of the growth of
+data and the error catastrophe in De Bruijn graphs, discussed above,
+low memory data structures and fast operations have been practically useful
+and interesting for real-world data analysis problems.
+
+A hands-on exploration
+======================
+
+khmer is written in C++ with a Python wrapping; while the underlying
+C++ code is directly usable, it's not very mature.  This is because
+within our group we almost entirely use the Python API.  This is what
+the command-line scripts and all the tests also use.
+
+Below, we explore some of the basic concepts in khmer.
+
+Basic k-mer storage: ``Nodegraph`` and ``Countgraph``
+-----------------------------------------------------
+
+To store a k-mer, you first create a Nodegraph or a Countgraph,
+and give it a k-mer size and some other parameters (discussed below).
+
+Let's start with a k-mer size of 7:
+
+>>> K = 7
+>>> kmer = 'ATGGATG'
+
+A Nodegraph stores the presence or absence of k-mers, without keeping
+track of their count:
+
+>>> ng = khmer.Nodegraph(K, 1e6, 4)
+>>> ng.get(kmer)
+0
+>>> ng.add(kmer)
+>>> ng.get(kmer)
+1
+>>> ng.add(kmer)
+>>> ng.get(kmer)
+1
+
+A Countgraph stores the count of k-mers, up to 255 (8 bits).
+
+>>> cg = khmer.Countgraph(K, 1e6, 4)
+>>> cg.get(kmer)
+0
+>>> cg.add(kmer)
+>>> cg.get(kmer)
+1
+>>> cg.add(kmer)
+>>> cg.get(kmer)
+2
+
+In either case, we can ask for all of the neighboring nodes in the graph,
+which, in this case, will be none --
+
+>>> cg.neighbors(kmer)
+[]
+
+If we add an adjoining k-mer, though --
+
+>>> cg.add(kmer[1:] + 'G')
+>>> cg.neighbors(kmer)
+[5555]
+
+we'll get back a neighbor.  Here, the neighbor is represented numerically;
+you can get the neighbor back as a string with the ``reverse_hash`` method:
+
+>>> ns = cg.neighbors(kmer)
+>>> cg.reverse_hash(ns[0])
+xxxx
+
+Where's the graph, then?
+------------------------
+
+This simple concept of "storing k-mers" can be used to do a bunch of
+useful things - for example, assembly.
+
+Let's start with a larger K, to avoid repeats --
+
+>>> K = 21
+>>> ng = khmer.Nodegraph(K, 1e6, 4)
+
+@@traverse?
+
+Now, suppose we have a sequence longer than K:
+
+>>> seq = 'CCCTGTTAGCTACGTCCGTCTAAGGATATTAACATAGTTGCGACTGCGTCCTGTGCTCA'
+
+We can add it to the graph with ``consume``:
+
+>>> ng.consume(seq)
+
+and we can now traverse it from one end to the other like so:
+
+>>> start_kmer = seq[:K]
+>>> ng.assemble_linear_path(start_kmer)
+
+That, in a nutshell, is what assemblers do.
+
+Revisiting a few pecularities
+-----------------------------
+
+Because of the memory-efficient way that khmer stores k-mers, the
+Nodegraph and Countgraph structures don't actually keep track of the
+actual k-mer; this means you can't ask the data structures for a list
+of the k-mers they contain.  So you always have to know what k-mer
+you're asking about.  In practice, this means you need a starting
+point.
+
+Extracting the error rate.
+The error rate really doesn't matter in the context of real data.
+
+Allocating memory up front.
+
+Next: :doc:`manipulating-histograms`

@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Larger perspectives and considerations &mdash; zaok 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="zaok 0.1 documentation" href="index.html" />
+    <link rel="next" title="Choosing parameters" href="choosing-parameters.html" />
+    <link rel="prev" title="Using khmer on real data" href="actually-using-khmer.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>zaok 0.1 documentation</span></a></h1>
+        <h2 class="heading"><span>Larger perspectives and considerations</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="actually-using-khmer.html">Using khmer on real data</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="choosing-parameters.html">Choosing parameters</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="larger-perspectives-and-considerations">
+<h1>Larger perspectives and considerations<a class="headerlink" href="#larger-perspectives-and-considerations" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="avoid-assembling-as-long-as-possible">
+<h2>Avoid assembling as long as possible<a class="headerlink" href="#avoid-assembling-as-long-as-possible" title="Permalink to this headline">¶</a></h2>
+<p>Heuristics remove real information.</p>
+<ul class="simple">
+<li>strain variation is collapsed</li>
+<li>repeats are ignored.</li>
+<li>isoforms removed.</li>
+</ul>
+<p>Key point is that true path(s) are in the graph, within limits of
+coverage.  Keep graph around as long as possible.</p>
+</div>
+<div class="section" id="be-cloud-compatible">
+<h2>Be cloud compatible<a class="headerlink" href="#be-cloud-compatible" title="Permalink to this headline">¶</a></h2>
+<p>Low memory, low I/O. Heavy compute is fine.</p>
+</div>
+<div class="section" id="think-streaming">
+<h2>Think streaming<a class="headerlink" href="#think-streaming" title="Permalink to this headline">¶</a></h2>
+<p>We think streaming is the future.  We should do more of it.</p>
+</div>
+<div class="section" id="be-practically-efficient-but-not-necessarily-optimized">
+<h2>Be practically efficient, but not necessarily optimized<a class="headerlink" href="#be-practically-efficient-but-not-necessarily-optimized" title="Permalink to this headline">¶</a></h2>
+<p>Workflows should complete, and not fail (due to lack of memory or
+other concerns); but at the same time, optimizing the heck out of code
+tends to lead to incomprehensible code.  These considerations should
+be balanced... somehow.</p>
+</div>
+<div class="section" id="correctness-is-more-important-than-speed">
+<h2>Correctness is more important than speed<a class="headerlink" href="#correctness-is-more-important-than-speed" title="Permalink to this headline">¶</a></h2>
+<p>Hopefully this is obvious.</p>
+</div>
+<div class="section" id="intermediate-goal">
+<h2>Intermediate goal<a class="headerlink" href="#intermediate-goal" title="Permalink to this headline">¶</a></h2>
+<p>Our intermediate goal is to make asking questions of data quick and easy,
+while simultaneously not killing our own career(s).</p>
+<p>This typically involves finding a set of questions that can&#8217;t be easily
+addressed (or addressed at all), and then trying to find a common
+solution to those problems that involves algorithmic or data structure
+novelty.</p>
+<p>There are obvious problems with this approach but it&#8217;s worked so far.</p>
+</div>
+<div class="section" id="our-end-goal-is-biological-data-analysis-probably">
+<h2>Our end goal is biological data analysis - probably.<a class="headerlink" href="#our-end-goal-is-biological-data-analysis-probably" title="Permalink to this headline">¶</a></h2>
+<p>In the past, we&#8217;ve focused on method development that is critical for
+advancing biological data analysis - mostly our own.  This means that
+many of our tools have fairly narrow applicability.</p>
+<p>This is open to change, since it&#8217;s becoming clear(er) that the kinds
+of methods we are building have broad(er) applicability across
+biology.  However, it is hard to make such arguments to funding agencies.</p>
+</div>
+<div class="section" id="we-don-t-expect-other-people-to-use-our-software">
+<h2>We don&#8217;t expect other people to use our software...<a class="headerlink" href="#we-don-t-expect-other-people-to-use-our-software" title="Permalink to this headline">¶</a></h2>
+<p>See alt implementations.</p>
+</div>
+<div class="section" id="but-stability-is-still-a-core-value">
+<h2>...but stability is still a core value<a class="headerlink" href="#but-stability-is-still-a-core-value" title="Permalink to this headline">¶</a></h2>
+<p>We and others use our software to do things, not just to explore concepts
+in bioinformatics and software development.</p>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="actually-using-khmer.html">Using khmer on real data</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="choosing-parameters.html">Choosing parameters</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, C. Titus Brown.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>
