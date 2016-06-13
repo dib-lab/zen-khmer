@@ -467,6 +467,10 @@ reverse-complement k-mers.)</p>
 7967
 </pre></div></div>
 </div>
+</div>
+</div>
+<div class="section" id="Working-with-sequences-rather-than-k-mers">
+<h2>Working with sequences rather than k-mers<a class="headerlink" href="#Working-with-sequences-rather-than-k-mers" title="Permalink to this headline">¶</a></h2>
 <p>In general, we don&#8217;t want to work with individual k-mers - we want to
 work with sequences of them.</p>
 <p>khmer has lots of functions for working with sequences longer than the
@@ -565,7 +569,6 @@ average, and stddev of the k-mer counts in it:</p>
 <div class="highlight-ipython3"><div class="highlight"><pre>
 <span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">median</span><span class="p">,</span> <span class="n">avg</span><span class="p">,</span> <span class="n">stddev</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">get_median_count</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
 </pre></div>
-</div>
 </div>
 </div>
 <div class="section" id="Where's-the-graph,-then?">
@@ -693,6 +696,11 @@ k-mers consumed:</p>
 <p>Both screed and khmer will take FASTA and FASTQ files, plain text or
 gzipped or bz2-zipped.</p>
 </div>
+<div class="section" id="Question">
+<h3>Question<a class="headerlink" href="#Question" title="Permalink to this headline">¶</a></h3>
+<p>How would we use the functionality described so far to characterize the
+difference in high-abundance k-mers between two data sets?</p>
+</div>
 <div class="section" id="Revisiting-a-few-pecularities">
 <h3>Revisiting a few pecularities<a class="headerlink" href="#Revisiting-a-few-pecularities" title="Permalink to this headline">¶</a></h3>
 <p>Because of the memory-efficient way that khmer stores k-mers, the
@@ -757,7 +765,7 @@ histograms</a></p>
 
     <div class="footer" role="contentinfo">
         &copy; Copyright 2016, C. Titus Brown.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
     </div>
   </body>
 </html>

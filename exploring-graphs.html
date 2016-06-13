@@ -182,7 +182,7 @@ div.nboutput  > :nth-child(2).stderr {
 </style>
 <div class="nbinput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [2]:
+<span></span>In [1]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -200,9 +200,99 @@ functionality is aimed at simplifying, or at least making possible, some
 basic traversal approaches.</p>
 <div class="section" id="Some-basic-traversal-functions.">
 <h2>Some basic traversal functions.<a class="headerlink" href="#Some-basic-traversal-functions." title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s start with some initial code that builds us a linear path in a
+graph:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">K</span> <span class="o">=</span> <span class="mi">21</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">Countgraph</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">seq</span> <span class="o">=</span> <span class="s1">&#39;CCCTGTTAGCTACGTCCGTCTAAGGATATTAACATAGTTGCGACTGCGTCCTGTGCTCA&#39;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[2]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>39
+</pre></div>
+</div>
+</div>
+<p>In general, we use reads or sequences as an index into the De Bruijn
+graph, and most of the graph functions take either a k-mer or a sequence
+as input.</p>
+<p>For example, if you wanted to get the degree (number of neighbors) for
+each k-mer in that sequence, you could ask:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span> <span class="o">-</span> <span class="n">K</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+<span class="o">...</span>    <span class="n">kmer</span> <span class="o">=</span> <span class="n">seq</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">K</span><span class="p">]</span>
+<span class="o">...</span>    <span class="nb">print</span><span class="p">(</span><span class="n">ng</span><span class="o">.</span><span class="n">kmer_degree</span><span class="p">(</span><span class="n">kmer</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1
+</pre></div></div>
+</div>
+<p>This tells you that the sequence is linear and disconnected - no node
+has more than two neighbors, and the end nodes have one neighbor.</p>
+<div class="section" id="Question:">
+<h3>Question:<a class="headerlink" href="#Question:" title="Permalink to this headline">¶</a></h3>
+<p>How would you introduce a higher-degree node into this graph?</p>
+<p>You can also ask for the identity of the neighbors for each k-mer with
+the function &#8216;ng.neighbors(kmer)&#8217;.</p>
+<p>We don&#8217;t actually do too much exploration of graphs at the Python level,
+because, well, for large data sets it&#8217;s slow.</p>
+<p>Instead, we provide a few slightly higher level functions, such as
+<code class="docutils literal"><span class="pre">calc_connected_graph_size</span></code>, which tells you how many k-mers connect
+to the seed kmer in the graph:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">calc_connected_graph_size</span><span class="p">(</span><span class="n">seq</span><span class="p">[:</span><span class="n">K</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[4]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>39
+</pre></div>
+</div>
+</div>
+<p>Keep in mind that for really large graphs, this may take a really,
+really long time to run.</p>
+</div>
+<div class="section" id="Question:">
+<h3>Question:<a class="headerlink" href="#Question:" title="Permalink to this headline">¶</a></h3>
+<p>How would you increase the size of the connected graph?</p>
+</div>
 </div>
 <div class="section" id="Building-waypoints-in-De-Bruijn-graphs">
 <h2>Building waypoints in De Bruijn graphs<a class="headerlink" href="#Building-waypoints-in-De-Bruijn-graphs" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes we have to deal with extremely large graphs.</p>
 <p>khmer provides a technique called &#8216;tagging&#8217;, in which a subset of k-mers
 in the graph are chosen as representatives of the whole graph - and we
 choose these representatives so that <em>every</em> k-mer in the entire graph
@@ -237,7 +327,7 @@ set to store the tags...</p>
 <p>First, construct a Nodegraph:</p>
 <div class="nbinput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [3]:
+<span></span>In [5]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -249,7 +339,7 @@ set to store the tags...</p>
 <p>Create a sequence longer than K:</p>
 <div class="nbinput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [16]:
+<span></span>In [6]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -261,7 +351,7 @@ set to store the tags...</p>
 <code class="docutils literal"><span class="pre">consume_and_tag</span></code>:</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [17]:
+<span></span>In [7]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -271,7 +361,7 @@ set to store the tags...</p>
 </div>
 <div class="nboutput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[17]:
+<span></span>Out[7]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
@@ -282,7 +372,7 @@ set to store the tags...</p>
 <p>You can now look at the tags with <code class="docutils literal"><span class="pre">get_tags_and_positions</span></code>:</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [19]:
+<span></span>In [8]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -292,7 +382,7 @@ set to store the tags...</p>
 </div>
 <div class="nboutput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[19]:
+<span></span>Out[8]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
@@ -305,7 +395,7 @@ the sequence, and the second element is the actual tag &#8211; you can
 convert those back into DNA with <code class="docutils literal"><span class="pre">reverse_hash</span></code>:</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [20]:
+<span></span>In [9]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -316,7 +406,7 @@ convert those back into DNA with <code class="docutils literal"><span class="pre
 </div>
 <div class="nboutput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[20]:
+<span></span>Out[9]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
@@ -337,7 +427,8 @@ create the tags ;).</li>
 <p>The motivation behind tags came from a desire to <em>partition</em> data sets:
 back when, our intution was that metagenome data sets should split up
 into disconnected components based on their origin species. (You can
-read more in Pell et al., 2012. &#64;cite.)</p>
+read more in <a class="reference external" href="http://www.pnas.org/content/109/33/13272.abstract">Pell et al.,
+2012</a>.)</p>
 <p>This is challenging because you essentially want an all-by-all
 connectivity map for the graph - you want to know, does read A connect
 (transitively) to read Z, by any path, and you want to know this for all
@@ -352,7 +443,8 @@ tags within distance D;</li>
 <li>split the reads up based on their partition IDs.</li>
 </ul>
 <p>This does work, mostly, and it turns out to split the graph up into bins
-that group reads by species. &#64;&#64;more here.</p>
+that group reads by species. (See <a class="reference external" href="http://www.pnas.org/content/111/13/4904">Howe et al.,
+2014</a>.)</p>
 <p>For an example of partitioning, let&#8217;s construct an artifical sequence.</p>
 <div class="nbinput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
@@ -410,7 +502,7 @@ that group reads by species. &#64;&#64;more here.</p>
 a partition count:</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [21]:
+<span></span>In [13]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -433,7 +525,7 @@ a partition count:</p>
 partitions:</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [22]:
+<span></span>In [14]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -443,18 +535,18 @@ partitions:</p>
 </div>
 <div class="nboutput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[22]:
+<span></span>Out[14]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>0
+<span></span>40
 </pre></div>
 </div>
 </div>
 <p>If we redo the partitioning, we should now get 1 partition:</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [23]:
+<span></span>In [15]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -469,7 +561,7 @@ partitions:</p>
 </div>
 <div class="container">
 <div class="highlight"><pre>
-2
+1
 </pre></div></div>
 </div>
 <p>...and we do!</p>
@@ -479,15 +571,13 @@ post</a>).
 The downsides of the approach are:</p>
 <ul class="simple">
 <li>it turns out that any source of systematic bias in sequencing will
-result in a completely connected graph (&#64;cite); such biases are
-common.</li>
+result in a completely connected graph (<a class="reference external" href="https://arxiv.org/abs/1212.0159">Howe et al.,
+2012</a>; such biases are common.</li>
 <li>it also turns out that most metagenome graphs are, in reality,
 completely connected.</li>
 </ul>
 <p>However, tags are still potentially useful for other things than
 straight up partitioning.</p>
-<div class="section" id="Labeling-graphs">
-<h3>Labeling graphs<a class="headerlink" href="#Labeling-graphs" title="Permalink to this headline">¶</a></h3>
 <p>Camille Scott extended tagging with <em>labels</em> - the idea is that each tag
 can be labelled with 1 or more arbitrary identifiers. This lets you do
 things like build colored De Bruijn graphs, equiv. do pangenome
@@ -495,9 +585,64 @@ analysis.</p>
 <p>References:</p>
 <p><a class="reference external" href="http://ivory.idyll.org/blog/2015-wok-labelhash.html">http://ivory.idyll.org/blog/2015-wok-labelhash.html</a></p>
 <p><a class="reference external" href="https://github.com/dib-lab/2015-khmer-wok4-multimap/blob/master/do-counting.py">https://github.com/dib-lab/2015-khmer-wok4-multimap/blob/master/do-counting.py</a></p>
+<p>For an example, let&#8217;s take the sequence we used in partitioning, and add
+labels &#8211; here, &#8216;1&#8217; and &#8216;2&#8217;.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [16]:
+</pre></div>
 </div>
-<div class="section" id="Building-compact-De-Bruijn-graphs">
-<h3>Building compact De Bruijn graphs<a class="headerlink" href="#Building-compact-De-Bruijn-graphs" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">K</span> <span class="o">=</span> <span class="mi">21</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">Nodegraph</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">lh</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">_GraphLabels</span><span class="p">(</span><span class="n">ng</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">lh</span><span class="o">.</span><span class="n">consume_sequence_and_tag_with_labels</span><span class="p">(</span><span class="n">begin</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">lh</span><span class="o">.</span><span class="n">consume_sequence_and_tag_with_labels</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[16]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>50
+</pre></div>
+</div>
+</div>
+<p>We can now ask for labels by overlap with <code class="docutils literal"><span class="pre">longseq</span></code>:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [17]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">tags</span> <span class="o">=</span> <span class="n">ng</span><span class="o">.</span><span class="n">get_tags_and_positions</span><span class="p">(</span><span class="n">longseq</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+<span class="o">...</span>    <span class="nb">print</span><span class="p">(</span><span class="n">lh</span><span class="o">.</span><span class="n">get_tag_labels</span><span class="p">(</span><span class="n">tag</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+[1]
+[1]
+[2]
+[2]
+</pre></div></div>
+</div>
+<p>This lets us add arbitrary information to the graph by indexing using
+the tags or the labels.</p>
+<p>One particular use case for this is comparing several different data
+sets by looking at how the graphs overlap, or do not. This is explored a
+bit in <a class="reference external" href="http://ivory.idyll.org/blog/2015-wok-evaluate.html">a blog
+post</a>.</p>
+<p>We&#8217;ll show another prototype use case belong, for labeling longer paths
+for use in assembly.</p>
 <p>De Bruijn graphs themselves are often quite large, because they have as
 many nodes in them as there are unique k-mers in the data set. Many of
 these k-mers may be collapsable into linear paths. The result of doing
@@ -505,15 +650,273 @@ this graph contraction is called a &#8220;compact De Bruijn graph&#8221;, and we
 have some functionality for building them in khmer.</p>
 <p>This functionality consists of two functions on graphs:
 <code class="docutils literal"><span class="pre">find_high_degree_nodes</span></code> and <code class="docutils literal"><span class="pre">traverse_and_mark_linear_paths</span></code>.</p>
-<p>There&#8217;s a script sandbox/extract-compact-dbg.py.</p>
-<p>fp</p>
+<p>There&#8217;s a script
+<a class="reference external" href="https://github.com/dib-lab/khmer/blob/zaok/sandbox/extract-compact-dbg.py">sandbox/extract-compact-dbg.py</a>
+that you can use with genomes or reads. For this, you&#8217;ll need a copy of
+the script from khmer&#8217;s sandbox directory &#8211;</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [18]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>curl -L -O https://github.com/dib-lab/khmer/raw/zaok/sandbox/extract-compact-dbg.py
+<span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>curl -L -O https://github.com/dib-lab/khmer/raw/zaok/sandbox/graph_writer.py
+
+<span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>chmod +x extract-compact-dbg.py
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   149  100   149    0     0    155      0 --:--:-- --:--:-- --:--:--   155
+100  5697  100  5697    0     0   3358      0  0:00:01  0:00:01 --:--:-- 11918
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   142  100   142    0     0    194      0 --:--:-- --:--:-- --:--:--   194
+100  2546  100  2546    0     0   2663      0 --:--:-- --:--:-- --:--:--  2663
+</pre></div></div>
+</div>
+<p>This script produces GML files that can be viewed with
+<a class="reference external" href="https://gephi.org/">Gephi</a>.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [19]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>./extract-compact-dbg.py -x 1e6 data/genome.fa.gz -o genome.gml
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+building graphs and loading files
+finding high degree nodes
+traversing linear segments from 4 nodes
+... 0 of 4
+13 segments, containing 10094 nodes
+saving to genome.gml
+</pre></div></div>
+</div>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [20]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>./extract-compact-dbg.py -x 1e8 data/reads.fa.gz -o reads.gml
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+building graphs and loading files
+... data/reads.fa.gz 10000
+... data/reads.fa.gz 20000
+finding high degree nodes
+...2 data/reads.fa.gz 10000
+...2 data/reads.fa.gz 20000
+traversing linear segments from 16554 nodes
+... 0 of 16554
+... 10000 of 16554
+29382 segments, containing 737769 nodes
+saving to reads.gml
+</pre></div></div>
+</div>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [21]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>./extract-compact-dbg.py -x 1e6 data/mixed-species.fa.gz -o mixed.gml
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+building graphs and loading files
+finding high degree nodes
+traversing linear segments from 3 nodes
+... 0 of 3
+11 segments, containing 10033 nodes
+saving to mixed.gml
+</pre></div></div>
 </div>
 </div>
 <div class="section" id="Visualizing-compact-De-Bruijn-graphs-with-Gephi">
 <h2>Visualizing compact De Bruijn graphs with Gephi<a class="headerlink" href="#Visualizing-compact-De-Bruijn-graphs-with-Gephi" title="Permalink to this headline">¶</a></h2>
+<p>(Gephi demo here)</p>
 </div>
 <div class="section" id="Assembling-linear-sequences">
 <h2>Assembling linear sequences<a class="headerlink" href="#Assembling-linear-sequences" title="Permalink to this headline">¶</a></h2>
+<p>For a long time, we avoided anything that smacked of actual assembly.
+But, well, inspired by the compact DBG stuff, we recently added some
+assembly functionality &#8211; you&#8217;ve already seen one of the functions:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [22]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">input_seq</span> <span class="o">=</span> <span class="s2">&quot;TGAGCACAGGACGCAGTCGCAACTATGTTAATATCCTTAGACGGACGTAGCTAACAGGG&quot;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">Nodegraph</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="n">input_seq</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">assemble_linear_path</span><span class="p">(</span><span class="s1">&#39;AGACGGACGTAGCTAACAGGG&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[22]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>&#39;TGAGCACAGGACGCAGTCGCAACTATGTTAATATCCTTAGACGGACGTAGCTAACAGGG&#39;
+</pre></div>
+</div>
+</div>
+<p>but this only works on linear segments of graphs &#8211; for example, if we
+add a neighbor in the middle, it confounds the graph and you get a short
+assembly:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [23]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="s1">&#39;G&#39;</span> <span class="o">+</span> <span class="n">input_seq</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">30</span><span class="o">+</span><span class="n">K</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">assemble_linear_path</span><span class="p">(</span><span class="s1">&#39;AGACGGACGTAGCTAACAGGG&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[23]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>&#39;ATATCCTTAGACGGACGTAGCTAACAGGG&#39;
+</pre></div>
+</div>
+</div>
+<p>There are several ways to handle this, but they all require simplifying
+the graph (by trimming errors, or finding short branches, or what have
+you). However you decide to simplify the graph, you can delete nodes by
+creating a &#8220;stopgraph&#8221; and passing that in - this tells the assembly
+function to ignore that node completely.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [24]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">stopgraph</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">Nodegraph</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">stopgraph</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="s1">&#39;G&#39;</span> <span class="o">+</span> <span class="n">input_seq</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">30</span><span class="o">+</span><span class="n">K</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">assemble_linear_path</span><span class="p">(</span><span class="s1">&#39;AGACGGACGTAGCTAACAGGG&#39;</span><span class="p">,</span> <span class="n">stopgraph</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[24]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>&#39;TGAGCACAGGACGCAGTCGCAACTATGTTAATATCCTTAGACGGACGTAGCTAACAGGG&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Assembling-across-high-degree-nodes-with-labeled-paths">
+<h2>Assembling across high-degree nodes with labeled paths<a class="headerlink" href="#Assembling-across-high-degree-nodes-with-labeled-paths" title="Permalink to this headline">¶</a></h2>
+<p>You can also use labels to identify situations where you have evidence
+for crossing a branch point. For example,</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [25]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">input_seq</span> <span class="o">=</span> <span class="s2">&quot;TGAGCACAGGACGCAGTCGCAACTATGTTAATATCCTTAGACGGACGTAGCTAACAGGG&quot;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">Nodegraph</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="n">input_seq</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="s1">&#39;G&#39;</span> <span class="o">+</span> <span class="n">input_seq</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">30</span><span class="o">+</span><span class="n">K</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[25]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>1
+</pre></div>
+</div>
+</div>
+<p>First, find high degree nodes:</p>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [26]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">hdn</span> <span class="o">=</span> <span class="n">ng</span><span class="o">.</span><span class="n">find_high_degree_nodes</span><span class="p">(</span><span class="n">input_seq</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Then, use labels to build paths across high degree nodes:</p>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [27]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">lh</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">_GraphLabels</span><span class="p">(</span><span class="n">ng</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">lh</span><span class="o">.</span><span class="n">label_across_high_degree_nodes</span><span class="p">(</span><span class="n">input_seq</span><span class="p">,</span> <span class="n">hdn</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+</pre></div>
+</div>
+</div>
+<p>And then assemble using the labels:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [28]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">lh</span><span class="o">.</span><span class="n">assemble_labeled_path</span><span class="p">(</span><span class="s1">&#39;AGACGGACGTAGCTAACAGGG&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[28]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>[&#39;TGAGCACAGGACGCAGTCGCAACTATGTTAATATCCTTAGACGGACGTAGCTAACAGGG&#39;]
+</pre></div>
+</div>
+</div>
 <p>Next: <a class="reference external" href="summarizing-khmer-basics.html">Summarizing the basics</a></p>
 </div>
 </div>
@@ -534,7 +937,7 @@ have some functionality for building them in khmer.</p>
 
     <div class="footer" role="contentinfo">
         &copy; Copyright 2016, C. Titus Brown.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
     </div>
   </body>
 </html>

@@ -37,9 +37,10 @@ Running it in a binder on mybinder
 ==================================
 
 Third, you can take advantage of `mybinder <http://mybinder.org>`__ and
-run it there, by clicking::
+run it there, by clicking:
 
-  ...
+.. image:: http://mybinder.org/badge.svg
+   :target: http://mybinder.org/repo/dib-lab/zaok
 
 Building the full documentation yourself
 ========================================
@@ -60,3 +61,12 @@ The GitHub pages site hosted at https://dib-lab.github.io/zen-khmer/
 is in the gh-pages/ branch at https://github.com/dib-lab/zen-khmer.
 (We do it this way to avoid having to switch branches to update the
 docs.)
+
+Jupyter Notebook quickstart
+===========================
+
+``Shift-ENTER`` will execute a cell.
+
+You can go in and edit a cell and re-run it with ``Shift-ENTER``.
+
+The Kernel menu has an entry 'Restart & Run all', too.

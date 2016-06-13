@@ -373,6 +373,8 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
+    "## Working with sequences rather than k-mers\n",
+    "\n",
     "In general, we don't want to work with individual k-mers - we want to work with sequences of them.\n",
     "\n",
     "khmer has lots of functions for working with sequences longer than the k-mer size.  This starts\n",
@@ -652,6 +654,15 @@
    "metadata": {},
    "source": [
     "Both screed and khmer will take FASTA and FASTQ files, plain text or gzipped or bz2-zipped."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Question\n",
+    "\n",
+    "How would we use the functionality described so far to characterize the difference in high-abundance k-mers between two data sets?"
    ]
   },
   {

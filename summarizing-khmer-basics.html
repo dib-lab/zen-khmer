@@ -49,7 +49,26 @@
         
   <div class="section" id="summarizing-the-basics">
 <h1>Summarizing the basics<a class="headerlink" href="#summarizing-the-basics" title="Permalink to this headline">¶</a></h1>
-<p>Foo!</p>
+<p>khmer is built around the idea of storing k-mer presence/absence and k-mer
+counts efficiently.</p>
+<p>It has a number of efficient algorithms for removing errors from sequencing
+data.</p>
+<p>It also has some functionality for exploring, tagging, and labeling graphs.</p>
+<p>We&#8217;re just adding some newer functionality for looking at compact De
+Bruijn graphs and assembling directly off of the graph.</p>
+<div class="section" id="what-is-unique-special-or-otherwise-different-about-khmer">
+<h2>What is unique, special, or otherwise different about khmer?<a class="headerlink" href="#what-is-unique-special-or-otherwise-different-about-khmer" title="Permalink to this headline">¶</a></h2>
+<p>None of these are unique, but we like them.</p>
+<ul class="simple">
+<li>The library approach is sadly somewhat rare in bioinformatics.</li>
+<li>We have a Python API that we &#8220;dogfood&#8221; - we use it ourselves for everything.</li>
+<li>We are concerned about sustainability of software development, so we test
+the heck out of everything.</li>
+<li>Our focus on online and streaming algorithms is rather rare.</li>
+<li>Our explicit focus on low memory is also somewhat rare.</li>
+<li>Our overall approach (prefiltering and diagnostics) is rather different.</li>
+</ul>
+</div>
 </div>
 
 
@@ -68,7 +87,7 @@
 
     <div class="footer" role="contentinfo">
         &copy; Copyright 2016, C. Titus Brown.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
     </div>
   </body>
 </html>
