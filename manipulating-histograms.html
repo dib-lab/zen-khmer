@@ -182,32 +182,54 @@ div.nboutput  > :nth-child(2).stderr {
 </style>
 <div class="nbinput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [12]:
+<span></span>In [1]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
-<span class="kn">from</span> <span class="nn">pylab</span> <span class="k">import</span> <span class="o">*</span>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">pylab</span> <span class="k">import</span> <span class="o">*</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">numpy</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">khmer</span><span class="o">,</span> <span class="nn">screed</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="Manipulating-k-mer-abundance-spectra">
 <h1>Manipulating k-mer abundance spectra<a class="headerlink" href="#Manipulating-k-mer-abundance-spectra" title="Permalink to this headline">¶</a></h1>
 <p>Let&#8217;s turn to the question of k-mer abundances.</p>
-<p>Suppose you have 500x coverage of a 1kb single-copy linear DNA sequence
+<p>Suppose you have 1000x coverage of a 1kb single-copy linear DNA sequence
 in 100 bp reads. On average, with truly random and uniform sampling, you
-would see every base in the true sequence 500 times, with about half
+would see every base in the true sequence 1000 times, with about half
 more frequently and half less frequently. You could measure this quite
 easily with mapping - simply map all the reads to the linear sequence,
 and then count the number of times each base is covered by a read.</p>
-<div class="nbinput nblast container">
+<div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [13]:
+<span></span>In [2]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="c1"># @CTB</span>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="c1"># !bowtie2-build data/genome.fa data/genome</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="c1"># !gunzip -c data/reads.fa.gz | bowtie2 data/genome -f -  &gt; data/reads.map</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">coverhist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;data/reads.map.cover&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">coverhist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">coverhist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
 </pre></div>
+</div>
+</div>
+<div class="nboutput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[2]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>[&lt;matplotlib.lines.Line2D at 0x10566ef60&gt;]
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<img alt="_images/manipulating-histograms_2_1.png" src="_images/manipulating-histograms_2_1.png" />
 </div>
 </div>
 <p>If, however, you don&#8217;t know the true sequence, you can still estimate
@@ -215,11 +237,11 @@ the coverage by looking at the histogram of k-mer abundances, or k-mer
 abundance spectrum:</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [14]:
+<span></span>In [3]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="o">!</span>abundance-dist-single.py -k <span class="m">21</span> -M 1e6 -s data/reads.fa.gz temp/hist.out
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>abundance-dist-single.py -q -k <span class="m">21</span> -M 1e6 -s data/reads.fa.gz temp/hist.out
 </pre></div>
 </div>
 </div>
@@ -228,52 +250,39 @@ abundance spectrum:</p>
 </div>
 <div class="container">
 <div class="highlight"><pre>
-
-|| This is the script abundance-dist-single.py in khmer.
-|| You are running khmer version 2.0+328.g2cf106b
-|| You are also using screed version 0.9+1.g73bfd79
-||
-|| If you use this script in a publication, please cite EACH of the following:
-||
-||   * MR Crusoe et al., 2015. http://dx.doi.org/10.12688/f1000research.6924.1
-||   * Q Zhang et al., http://dx.doi.org/10.1371/journal.pone.0101271
-||   * A. D\xf6ring et al. http://dx.doi.org:80/10.1186/1471-2105-9-11
-||
-|| Please see http://khmer.readthedocs.org/en/latest/citations.html for details.
-
-
-PARAMETERS:
- - kmer size =    21            (-k)
- - n tables =     4             (-N)
- - max tablesize = 2.5e+05      (-x)
-
-Estimated memory usage is 1e+06 bytes (n_tables x max_tablesize)
---------
-ERROR: temp/hist.out exists; not squashing.
+making countgraph
+building k-mer tracking graph
+kmer_size: 21
+k-mer countgraph sizes: [227271, 227269, 227267, 227265]
+outputting to temp/hist.out
+consuming input, round 1 -- data/reads.fa.gz
+Total number of unique k-mers: 246028
+preparing hist from data/reads.fa.gz...
+consuming input, round 2 -- data/reads.fa.gz
+wrote to: temp/hist.out
 </pre></div></div>
 </div>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [16]:
+<span></span>In [4]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span>
-<span class="n">hist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;temp/hist.out&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
-<span class="n">plot</span><span class="p">(</span><span class="n">hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">title</span><span class="p">(</span><span class="s1">&#39;k-mer abundance histogram for data/reads.fa.gz&#39;</span><span class="p">)</span>
-<span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;k-mer abundance&#39;</span><span class="p">)</span>
-<span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;N k-mers with that abundance&#39;</span><span class="p">)</span>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">hist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;temp/hist.out&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">title</span><span class="p">(</span><span class="s1">&#39;k-mer abundance histogram for data/reads.fa.gz&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;k-mer abundance&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;N k-mers with that abundance&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[16]:
+<span></span>Out[4]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.text.Text at 0x10595db38&gt;
+<span></span>&lt;matplotlib.text.Text at 0x10594b9b0&gt;
 </pre></div>
 </div>
 </div>
@@ -285,31 +294,31 @@ ERROR: temp/hist.out exists; not squashing.
 </div>
 </div>
 <p>Here, there are two peaks: one is the peak of true k-mer abundances,
-which is around 400. The other is the set of erroneous k-mers resulting
-from sequencing errors. The intuition is simple: in general, erroneous
-k-mers will only show up a few times, while k-mers that are generated
-from sampling true sequence will show up many times.</p>
+which is around x=140. The other is the set of erroneous k-mers
+resulting from sequencing errors. The intuition is simple: in general,
+erroneous k-mers will only show up a few times, while k-mers that are
+generated from sampling true sequence will show up many times.</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [17]:
+<span></span>In [5]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plot</span><span class="p">(</span><span class="n">hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">title</span><span class="p">(</span><span class="s1">&#39;erroneous k-mers in data/reads.fa.gz&#39;</span><span class="p">)</span>
-<span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;k-mer abundance&#39;</span><span class="p">)</span>
-<span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;N k-mers with that abundance&#39;</span><span class="p">)</span>
-<span class="n">axis</span><span class="p">(</span><span class="n">xmax</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">title</span><span class="p">(</span><span class="s1">&#39;erroneous k-mers in data/reads.fa.gz&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;k-mer abundance&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;N k-mers with that abundance&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">axis</span><span class="p">(</span><span class="n">xmax</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[17]:
+<span></span>Out[5]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>(0.0, 10, 0.0, 14000.0)
+<span></span>(0.0, 10, 0.0, 180000.0)
 </pre></div>
 </div>
 </div>
@@ -322,25 +331,25 @@ from sampling true sequence will show up many times.</p>
 </div>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [19]:
+<span></span>In [6]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">plot</span><span class="p">(</span><span class="n">hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">title</span><span class="p">(</span><span class="s1">&#39;real k-mers in data/reads.fa.gz&#39;</span><span class="p">)</span>
-<span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;k-mer abundance&#39;</span><span class="p">)</span>
-<span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;N k-mers with that abundance&#39;</span><span class="p">)</span>
-<span class="n">axis</span><span class="p">(</span><span class="n">ymax</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">title</span><span class="p">(</span><span class="s1">&#39;real k-mers in data/reads.fa.gz&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;k-mer abundance&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;N k-mers with that abundance&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">axis</span><span class="p">(</span><span class="n">ymax</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[19]:
+<span></span>Out[6]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>(0.0, 100.0, 0.0, 200)
+<span></span>(0.0, 180.0, 0.0, 500)
 </pre></div>
 </div>
 </div>
@@ -355,17 +364,19 @@ from sampling true sequence will show up many times.</p>
 quite clear:</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [23]:
+<span></span>In [7]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="o">!</span>load-into-counting.py -k <span class="m">21</span> -M 1e6 temp/reads.kh data/reads.fa.gz
-<span class="o">!</span>abundance-dist.py -s temp/reads.kh data/genome.fa.gz temp/hist-real.csv
-<span class="n">hist_real</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;temp/hist-real.csv&#39;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">plot</span><span class="p">(</span><span class="n">hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;error k-mers&#39;</span><span class="p">)</span>
-<span class="n">plot</span><span class="p">(</span><span class="n">hist_real</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">hist_real</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;real k-mers&#39;</span><span class="p">)</span>
-<span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
-<span class="n">axis</span><span class="p">(</span><span class="n">ymax</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>load-into-counting.py -q -k <span class="m">21</span> -M 1e6 temp/reads.kh data/reads.fa.gz
+
+<span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>abundance-dist.py -q -s temp/reads.kh data/genome.fa.gz temp/hist-real.csv
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">hist_real</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;temp/hist-real.csv&#39;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">hist_real</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">hist_real</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;real k-mers&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;error k-mers&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">axis</span><span class="p">(</span><span class="n">ymax</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -374,48 +385,15 @@ quite clear:</p>
 </div>
 <div class="container">
 <div class="highlight"><pre>
-
-|| This is the script load-into-counting.py in khmer.
-|| You are running khmer version 2.0+328.g2cf106b
-|| You are also using screed version 0.9+1.g73bfd79
-||
-|| If you use this script in a publication, please cite EACH of the following:
-||
-||   * MR Crusoe et al., 2015. http://dx.doi.org/10.12688/f1000research.6924.1
-||   * Q Zhang et al., http://dx.doi.org/10.1371/journal.pone.0101271
-||   * A. D\xf6ring et al. http://dx.doi.org:80/10.1186/1471-2105-9-11
-||
-|| Please see http://khmer.readthedocs.org/en/latest/citations.html for details.
-
-
-PARAMETERS:
- - kmer size =    21            (-k)
- - n tables =     4             (-N)
- - max tablesize = 2.5e+05      (-x)
-
-Estimated memory usage is 1e+06 bytes (n_tables x max_tablesize)
---------
 Saving k-mer countgraph to temp/reads.kh
 Loading kmers from sequences in [&#39;data/reads.fa.gz&#39;]
 making countgraph
 consuming input data/reads.fa.gz
-Total number of unique k-mers: 16087
+Total number of unique k-mers: 249310
 saving temp/reads.kh
-fp rate estimated to be 0.000
+fp rate estimated to be 0.179
 DONE.
 wrote to: temp/reads.kh.info
-
-|| This is the script abundance-dist.py in khmer.
-|| You are running khmer version 2.0+328.g2cf106b
-|| You are also using screed version 0.9+1.g73bfd79
-||
-|| If you use this script in a publication, please cite EACH of the following:
-||
-||   * MR Crusoe et al., 2015. http://dx.doi.org/10.12688/f1000research.6924.1
-||   * Q Zhang et al., http://dx.doi.org/10.1371/journal.pone.0101271
-||
-|| Please see http://khmer.readthedocs.org/en/latest/citations.html for details.
-
 Counting graph from temp/reads.kh
 K: 21
 outputting to temp/hist-real.csv
@@ -425,11 +403,11 @@ preparing hist...
 </div>
 <div class="nboutput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[23]:
+<span></span>Out[7]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>(0.0, 100.0, 0.0, 200)
+<span></span>(0.0, 180.0, 0.0, 500)
 </pre></div>
 </div>
 </div>
@@ -444,27 +422,138 @@ preparing hist...
 views of sequencing data &#8211; in any reasonable sequencing data set, there
 are many more erroneous k-mers (area under the left curve) than there
 are real k-mers (area under the right curve).</p>
-<p>This split in abundance peaks lets us do error analysis and trimming.</p>
+<p>This difference in abundance peaks lets us do error analysis and
+trimming.</p>
 <p>For example, errors can readily be identified in reads by looking at the
 first location where a low-abundance k-mer appears:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">first_read</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">screed</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;data/reads.fa.gz&#39;</span><span class="p">)))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">first_seq</span> <span class="o">=</span> <span class="n">first_read</span><span class="o">.</span><span class="n">sequence</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cg</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">load_countgraph</span><span class="p">(</span><span class="s1">&#39;temp/reads.kh&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">get_kmer_counts</span><span class="p">(</span><span class="n">first_seq</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">)),</span> <span class="n">cg</span><span class="o">.</span><span class="n">get_kmer_counts</span><span class="p">(</span><span class="n">first_seq</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;position in read&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;k-mer abundance at that position&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">title</span><span class="p">(</span><span class="s1">&#39;k-mer abundance profile of the first read&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[8]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.text.Text at 0x105f3d630&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<img alt="_images/manipulating-histograms_13_1.png" src="_images/manipulating-histograms_13_1.png" />
+</div>
+</div>
 <p>And, of course, you can simply remove all the low-abundance k-mers from
 reads altogether, leaving only the high-abundance k-mers:</p>
-<p>%% show distribution, k-mer counts</p>
-<p>This has the advantage of dramatically simplifying several issues:
-first, you don&#8217;t have nearly as many k-mers to keep track of, which can
-decrease the total amount of memory needed to process the reads in
-another ways; and second, assembly itself becomes much simpler if you
-are dealing with only correct k-mers, because then only repeats are
-problematic.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>filter-abund.py -q temp/reads.kh data/reads.fa.gz -C <span class="m">5</span> -o temp/reads.trimmed.fa
+
+<span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>abundance-dist-single.py -q -s -k <span class="m">21</span> -M 1e6 temp/reads.trimmed.fa temp/trimmed.csv
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">hist_trim</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;temp/trimmed.csv&#39;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">hist_trim</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">hist_trim</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;g*-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;trimmed k-mers&#39;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;error k-mers&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">hist_real</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">hist_real</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;real k-mers&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">axis</span><span class="p">(</span><span class="n">ymax</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+loading countgraph: temp/reads.kh
+K: 21
+filtering data/reads.fa.gz
+starting threads
+starting writer
+loading...
+... filtering 0
+done loading in sequences
+DONE writing.
+processed 20000 / wrote 16216 / removed 3784
+processed 2000000 bp / wrote 1216425 bp / removed 783575 bp
+discarded 39.2%
+output in temp/reads.trimmed.fa
+making countgraph
+building k-mer tracking graph
+kmer_size: 21
+k-mer countgraph sizes: [227271, 227269, 227267, 227265]
+outputting to temp/trimmed.csv
+consuming input, round 1 -- temp/reads.trimmed.fa
+Total number of unique k-mers: 10065
+preparing hist from temp/reads.trimmed.fa...
+consuming input, round 2 -- temp/reads.trimmed.fa
+wrote to: temp/trimmed.csv
+</pre></div></div>
+</div>
+<div class="nboutput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[9]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>(0.0, 180.0, 0.0, 600)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<img alt="_images/manipulating-histograms_15_2.png" src="_images/manipulating-histograms_15_2.png" />
+</div>
+</div>
+<p>If you look at the k-mer abundance spectrum of the trimmed k-mers
+(green) against the abundance spectrum of the whole data set (red), you
+will see that in effect we&#8217;ve shifted the abundance spectrum left - this
+is because we are trimming reads at low-abundance k-mers and discarding
+the remainder of the reads, rather than simply ignoring the low
+abundance k-mers.</p>
+<div class="section" id="Error-trimming-decreases-memory-consumption">
+<h2>Error trimming decreases memory consumption<a class="headerlink" href="#Error-trimming-decreases-memory-consumption" title="Permalink to this headline">¶</a></h2>
+<p>Error trimming has the advantage of dramatically simplifying several
+issues: first, you don&#8217;t have nearly as many k-mers to keep track of,
+which can decrease the total amount of memory needed to process the
+reads in another ways; and second, assembly itself becomes much simpler
+if you are dealing with only correct k-mers, because then only repeats
+are problematic.</p>
+<p>On the flip side, as you can see above, you lose quite a bit of data -
+the abundance histogram shifts quite far left - because when you trim
+reads at low-abundance k-mers, you also trim off high-abundance data to
+the right of them. There are ways to deal with this loss of data but in
+practice with high coverage data sets it&#8217;s not a problem.</p>
 <p>&#64;&#64;identify and mask low-abundance k-mers</p>
-<p>If you plot the k-mer abundance spectrum of the trimmed k-mers against
-the abundance spectrum of the whole data set, you will see that in
-effect we&#8217;ve shifted the abundance spectrum left - this is because we
-are trimming reads at low-abundance k-mers and discarding the remainder
-of the reads, rather than simply ignoring the low abundance k-mers.</p>
 <p>What else can we do with k-mer abundance spectra?</p>
 <div class="section" id="Variable-coverage-error-trimming">
-<h2>Variable coverage error trimming<a class="headerlink" href="#Variable-coverage-error-trimming" title="Permalink to this headline">¶</a></h2>
+<h3>Variable coverage error trimming<a class="headerlink" href="#Variable-coverage-error-trimming" title="Permalink to this headline">¶</a></h3>
 <p>The above approach of identifying low-abundance k-mers as errors works
 well in situations where you have high, uniform coverage of the
 molecules in your sample. This is possible to achieve with genomes by
@@ -474,13 +563,133 @@ MD-amplified samples? Any such samples of sufficient diversity will have
 both high-abundance components and low-abundance components.</p>
 <p>For example, consider a two-species metagenome, where one species
 (species A) is present at 100x the abundance of the other. If we
-sequence species A to 500x, species B will still only be present at 5x
+sequence species A to 1000x, species B will still only be present at 10x
 within the sample:</p>
-<p>%%</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>abundance-dist-single.py -s -q -M 1e7 data/mixed-reads.fa.gz temp/mixed-reads.hist
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">mixed_hist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;temp/mixed-reads.hist&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">mixed_hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">mixed_hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">axis</span><span class="p">(</span><span class="n">ymax</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">title</span><span class="p">(</span><span class="s1">&#39;real k-mers in data/mixed-reads.fa.gz&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;k-mer abundance&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;N k-mers with that abundance&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+making countgraph
+building k-mer tracking graph
+kmer_size: 32
+k-mer countgraph sizes: [2272726, 2272724, 2272722, 2272720]
+outputting to temp/mixed-reads.hist
+consuming input, round 1 -- data/mixed-reads.fa.gz
+Total number of unique k-mers: 87754
+preparing hist from data/mixed-reads.fa.gz...
+consuming input, round 2 -- data/mixed-reads.fa.gz
+wrote to: temp/mixed-reads.hist
+</pre></div></div>
+</div>
+<div class="nboutput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[10]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.text.Text at 0x105bc15c0&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<img alt="_images/manipulating-histograms_19_2.png" src="_images/manipulating-histograms_19_2.png" />
+</div>
+</div>
 <p>If we abundance trim at k-mers with abundance 3 as above, we&#8217;ll
 eliminate almost all of the real data from species B, along with many of
 the errors in species A.</p>
-<p>%%</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>filter-abund-single.py -q -M 1e6 -k <span class="m">21</span> -C <span class="m">10</span> data/mixed-reads.fa.gz
+<span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>mv mixed-reads.fa.gz.abundfilt temp/mixed-trim.fa
+
+<span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>abundance-dist-single.py -q -s -M 1e6 -k <span class="m">21</span> temp/mixed-trim.fa temp/mixed-trim.hist
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">mixed_trim_hist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;temp/mixed-trim.hist&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">mixed_trim_hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">mixed_trim_hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">axis</span><span class="p">(</span><span class="n">ymax</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">title</span><span class="p">(</span><span class="s1">&#39;k-mers in data/mixed-trim-hist.fa.gz&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;k-mer abundance&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;N k-mers with that abundance&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+making countgraph
+consuming input, round 1 -- data/mixed-reads.fa.gz
+Total number of unique k-mers: 70437
+fp rate estimated to be 0.004
+filtering data/mixed-reads.fa.gz
+starting threads
+starting writer
+loading...
+... filtering 0
+done loading in sequences
+DONE writing.
+processed 5508 / wrote 4395 / removed 1113
+processed 550800 bp / wrote 345804 bp / removed 204996 bp
+discarded 37.2%
+output in mixed-reads.fa.gz.abundfilt
+making countgraph
+building k-mer tracking graph
+kmer_size: 21
+k-mer countgraph sizes: [227271, 227269, 227267, 227265]
+outputting to temp/mixed-trim.hist
+consuming input, round 1 -- temp/mixed-trim.fa
+Total number of unique k-mers: 5588
+preparing hist from temp/mixed-trim.fa...
+consuming input, round 2 -- temp/mixed-trim.fa
+wrote to: temp/mixed-trim.hist
+</pre></div></div>
+</div>
+<div class="nboutput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[11]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.text.Text at 0x105a9e048&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<img alt="_images/manipulating-histograms_21_2.png" src="_images/manipulating-histograms_21_2.png" />
+</div>
+</div>
 <p>There&#8217;s an additional problem, too: deep sequencing of highly abundant
 molecules will yield erroneous k-mers with abundance &gt; 3.</p>
 <p>What we need to do here is apply a cutoff that takes into account the
@@ -494,20 +703,99 @@ median k-mer abundance of the k-mers in a read with respect to the
 overall k-mer spectrum. We can then choose our trimming cutoff so that
 k-mers outside the natural sampling spread of k-mers within the read are
 identified as errors:</p>
-<p>&#64;&#64;use ratio? %%</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>load-into-counting.py -M 1e6 -k <span class="m">21</span> -q temp/mixed-reads.kh data/mixed-reads.fa.gz
+<span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>filter-abund.py -q -C <span class="m">3</span> -V -Z <span class="m">20</span> temp/mixed-reads.kh data/mixed-reads.fa.gz -o temp/mixed-trimV.fa
+
+<span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>abundance-dist-single.py -q -s -M 1e6 -k <span class="m">21</span> temp/mixed-trimV.fa temp/mixed-trimV.hist
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">mixed_trimV_hist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;temp/mixed-trimV.hist&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">mixed_trimV_hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">mixed_trimV_hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;variable coverage trimmed&#39;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">mixed_trim_hist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;temp/mixed-trim.hist&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">mixed_trim_hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">mixed_trim_hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;hard trimmed&#39;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">axis</span><span class="p">(</span><span class="n">ymax</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;k-mer abundance&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;N k-mers with that abundance&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+Saving k-mer countgraph to temp/mixed-reads.kh
+Loading kmers from sequences in [&#39;data/mixed-reads.fa.gz&#39;]
+making countgraph
+consuming input data/mixed-reads.fa.gz
+Total number of unique k-mers: 70437
+saving temp/mixed-reads.kh
+fp rate estimated to be 0.004
+DONE.
+wrote to: temp/mixed-reads.kh.info
+loading countgraph: temp/mixed-reads.kh
+K: 21
+filtering data/mixed-reads.fa.gz
+starting threads
+starting writer
+loading...
+... filtering 0
+done loading in sequences
+DONE writing.
+processed 5508 / wrote 4840 / removed 668
+processed 550800 bp / wrote 403572 bp / removed 147228 bp
+discarded 26.7%
+output in temp/mixed-trimV.fa
+making countgraph
+building k-mer tracking graph
+kmer_size: 21
+k-mer countgraph sizes: [227271, 227269, 227267, 227265]
+outputting to temp/mixed-trimV.hist
+consuming input, round 1 -- temp/mixed-trimV.fa
+Total number of unique k-mers: 21130
+preparing hist from temp/mixed-trimV.fa...
+consuming input, round 2 -- temp/mixed-trimV.fa
+wrote to: temp/mixed-trimV.hist
+</pre></div></div>
+</div>
+<div class="nboutput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[14]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.text.Text at 0x106317e48&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<img alt="_images/manipulating-histograms_23_2.png" src="_images/manipulating-histograms_23_2.png" />
+</div>
+</div>
 <p>This has the effect of trimming off many errors for the high abundance
 reads, and trimming effectively no low-abundance reads. This is OK: it&#8217;s
 very hard to recover data you&#8217;ve eliminated, and for low-abundance
 reads, we must simply remain unsure of the distinction between &#8220;true&#8221;
 and erroneous k-mers.</p>
-<p>Underlying all of this, what we are really trying to do is estimate
+<p>&#64;&#64; Underlying all of this, what we are really trying to do is estimate
 whether or not a k-mer belongs to one of two Poisson distributions: the
 &#8220;true k-mer&#8221; Poisson distribution, or the &#8220;erroneous k-mer&#8221; Poisson
 distribution. For each true k-mer, an erroneous k-mer occurs at
 1/(k*3)th... so you&#8217;re essentially sampling from...</p>
 </div>
 <div class="section" id="Estimating-per-read-coverage,-more-generally">
-<h2>Estimating per-read coverage, more generally<a class="headerlink" href="#Estimating-per-read-coverage,-more-generally" title="Permalink to this headline">¶</a></h2>
+<h3>Estimating per-read coverage, more generally<a class="headerlink" href="#Estimating-per-read-coverage,-more-generally" title="Permalink to this headline">¶</a></h3>
 <p>The ability to estimate a read&#8217;s coverage by looking at k-mer abundances
 is pretty handy, because you can do it reference free and therefore you
 can use it to extract <em>reads</em> from data sets without assembling</p>
@@ -521,7 +809,7 @@ than 50.</p>
 <p>There may be other things you can do here too.</p>
 </div>
 <div class="section" id="Normalizing-read-coverages">
-<h2>Normalizing read coverages<a class="headerlink" href="#Normalizing-read-coverages" title="Permalink to this headline">¶</a></h2>
+<h3>Normalizing read coverages<a class="headerlink" href="#Normalizing-read-coverages" title="Permalink to this headline">¶</a></h3>
 <p>Let&#8217;s consider the situation above with two species A and B. A is kind
 of a problem &#8211; the bulk of the sequencing data is from A, and we don&#8217;t
 really need 500x coverage to recover the true genome of A.</p>
@@ -541,7 +829,7 @@ own &#8211; because we are discarding reads, we are also discarding errors in
 those reads.</p>
 </div>
 <div class="section" id="Is-the-true-sequence-still-present?">
-<h2>Is the true sequence still present?<a class="headerlink" href="#Is-the-true-sequence-still-present?" title="Permalink to this headline">¶</a></h2>
+<h3>Is the true sequence still present?<a class="headerlink" href="#Is-the-true-sequence-still-present?" title="Permalink to this headline">¶</a></h3>
 <p>With all of these manipulations to remove errors and redundancy in
 sequencing data sets, it is always nice to check that our beginning
 principle holds true - that the k-mers of the true genomic sequence
@@ -551,6 +839,7 @@ histogram functionality to look to see how many true k-mers are present
 in the read data set.</p>
 <p>%%</p>
 <p>Next: <a class="reference external" href="exploring-graphs.html">Exploring graphs</a></p>
+</div>
 </div>
 </div>
 
