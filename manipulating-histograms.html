@@ -196,7 +196,7 @@ div.nboutput  > :nth-child(2).stderr {
 <div class="section" id="Manipulating-k-mer-abundance-spectra">
 <h1>Manipulating k-mer abundance spectra<a class="headerlink" href="#Manipulating-k-mer-abundance-spectra" title="Permalink to this headline">¶</a></h1>
 <p>Let&#8217;s turn to the question of k-mer abundances.</p>
-<p>Suppose you have 1000x coverage of a 1kb single-copy linear DNA sequence
+<p>Suppose you have 200x coverage of a 1kb single-copy linear DNA sequence
 in 100 bp reads. On average, with truly random and uniform sampling, you
 would see every base in the true sequence 1000 times, with about half
 more frequently and half less frequently. You could measure this quite
@@ -221,7 +221,7 @@ and then count the number of times each base is covered by a read.</p>
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>[&lt;matplotlib.lines.Line2D at 0x10566ef60&gt;]
+<span></span>[&lt;matplotlib.lines.Line2D at 0x10589e278&gt;]
 </pre></div>
 </div>
 </div>
@@ -282,7 +282,7 @@ wrote to: temp/hist.out
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.text.Text at 0x10594b9b0&gt;
+<span></span>&lt;matplotlib.text.Text at 0x105955a20&gt;
 </pre></div>
 </div>
 </div>
@@ -298,6 +298,10 @@ which is around x=140. The other is the set of erroneous k-mers
 resulting from sequencing errors. The intuition is simple: in general,
 erroneous k-mers will only show up a few times, while k-mers that are
 generated from sampling true sequence will show up many times.</p>
+<div class="figure" id="id1">
+<img alt="kmers" src="_images/kmers-and-errors.jpg" />
+<p class="caption"><span class="caption-text">kmers</span></p>
+</div>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
 <span></span>In [5]:
@@ -424,6 +428,8 @@ are many more erroneous k-mers (area under the left curve) than there
 are real k-mers (area under the right curve).</p>
 <p>This difference in abundance peaks lets us do error analysis and
 trimming.</p>
+<div class="section" id="Finding-errors-in-reads">
+<h2>Finding errors in reads<a class="headerlink" href="#Finding-errors-in-reads" title="Permalink to this headline">¶</a></h2>
 <p>For example, errors can readily be identified in reads by looking at the
 first location where a low-abundance k-mer appears:</p>
 <div class="nbinput container">
@@ -451,7 +457,7 @@ first location where a low-abundance k-mer appears:</p>
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.text.Text at 0x105f3d630&gt;
+<span></span>&lt;matplotlib.text.Text at 0x105daf198&gt;
 </pre></div>
 </div>
 </div>
@@ -459,9 +465,12 @@ first location where a low-abundance k-mer appears:</p>
 <div class="container">
 </div>
 <div class="container">
-<img alt="_images/manipulating-histograms_13_1.png" src="_images/manipulating-histograms_13_1.png" />
+<img alt="_images/manipulating-histograms_14_1.png" src="_images/manipulating-histograms_14_1.png" />
 </div>
 </div>
+</div>
+<div class="section" id="Trimming-low-abundance-k-mers">
+<h2>Trimming low-abundance k-mers<a class="headerlink" href="#Trimming-low-abundance-k-mers" title="Permalink to this headline">¶</a></h2>
 <p>And, of course, you can simply remove all the low-abundance k-mers from
 reads altogether, leaving only the high-abundance k-mers:</p>
 <div class="nbinput container">
@@ -528,7 +537,7 @@ wrote to: temp/trimmed.csv
 <div class="container">
 </div>
 <div class="container">
-<img alt="_images/manipulating-histograms_15_2.png" src="_images/manipulating-histograms_15_2.png" />
+<img alt="_images/manipulating-histograms_16_2.png" src="_images/manipulating-histograms_16_2.png" />
 </div>
 </div>
 <p>If you look at the k-mer abundance spectrum of the trimmed k-mers
@@ -537,6 +546,7 @@ will see that in effect we&#8217;ve shifted the abundance spectrum left - this
 is because we are trimming reads at low-abundance k-mers and discarding
 the remainder of the reads, rather than simply ignoring the low
 abundance k-mers.</p>
+</div>
 <div class="section" id="Error-trimming-decreases-memory-consumption">
 <h2>Error trimming decreases memory consumption<a class="headerlink" href="#Error-trimming-decreases-memory-consumption" title="Permalink to this headline">¶</a></h2>
 <p>Error trimming has the advantage of dramatically simplifying several
@@ -550,7 +560,6 @@ the abundance histogram shifts quite far left - because when you trim
 reads at low-abundance k-mers, you also trim off high-abundance data to
 the right of them. There are ways to deal with this loss of data but in
 practice with high coverage data sets it&#8217;s not a problem.</p>
-<p>&#64;&#64;identify and mask low-abundance k-mers</p>
 <p>What else can we do with k-mer abundance spectra?</p>
 <div class="section" id="Variable-coverage-error-trimming">
 <h3>Variable coverage error trimming<a class="headerlink" href="#Variable-coverage-error-trimming" title="Permalink to this headline">¶</a></h3>
@@ -606,7 +615,7 @@ wrote to: temp/mixed-reads.hist
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.text.Text at 0x105bc15c0&gt;
+<span></span>&lt;matplotlib.text.Text at 0x105be6668&gt;
 </pre></div>
 </div>
 </div>
@@ -614,12 +623,13 @@ wrote to: temp/mixed-reads.hist
 <div class="container">
 </div>
 <div class="container">
-<img alt="_images/manipulating-histograms_19_2.png" src="_images/manipulating-histograms_19_2.png" />
+<img alt="_images/manipulating-histograms_20_2.png" src="_images/manipulating-histograms_20_2.png" />
 </div>
 </div>
 <p>If we abundance trim at k-mers with abundance 3 as above, we&#8217;ll
-eliminate almost all of the real data from species B, along with many of
-the errors in species A.</p>
+eliminate almost all of the real data from species B (the peak on the
+left), along with many of the errors in species A (the peak on the
+right, and the errors for which are in the peak on the left).</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
 <span></span>In [11]:
@@ -679,7 +689,7 @@ wrote to: temp/mixed-trim.hist
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.text.Text at 0x105a9e048&gt;
+<span></span>&lt;matplotlib.text.Text at 0x105d0a4e0&gt;
 </pre></div>
 </div>
 </div>
@@ -687,17 +697,20 @@ wrote to: temp/mixed-trim.hist
 <div class="container">
 </div>
 <div class="container">
-<img alt="_images/manipulating-histograms_21_2.png" src="_images/manipulating-histograms_21_2.png" />
+<img alt="_images/manipulating-histograms_22_2.png" src="_images/manipulating-histograms_22_2.png" />
 </div>
 </div>
-<p>There&#8217;s an additional problem, too: deep sequencing of highly abundant
-molecules will yield erroneous k-mers with abundance &gt; 3.</p>
-<p>What we need to do here is apply a cutoff that takes into account the
-local abundance of the read. While this may not be something that we
-know, we can estimate it on a per-read basis by looking at the other
-k-mers in the read &#8211; for example, if most of the k-mers in a read are
-high abundance in the overall data set, then probably the read itself is
-high abundance and any low-abundance k-mers in it are erroneous.</p>
+<p>Note that there&#8217;s an additional problem, too: deep sequencing of highly
+abundant molecules will yield erroneous k-mers with abundance &gt; 3. We
+don&#8217;t really see that here but if we increased the coverage to 1000 we
+would.</p>
+<p>What we need to do here is use a cutoff for error abundance that takes
+into account the local abundance of the read. While this may not be
+something that we know, we can estimate it on a per-read basis by
+looking at the other k-mers in the read &#8211; for example, if most of the
+k-mers in a read are high abundance in the overall data set, then
+probably the read itself is high abundance and any low-abundance k-mers
+in it are erroneous.</p>
 <p>Practically speaking, we can guess the abundance of a read by using the
 median k-mer abundance of the k-mers in a read with respect to the
 overall k-mer spectrum. We can then choose our trimming cutoff so that
@@ -705,7 +718,7 @@ k-mers outside the natural sampling spread of k-mers within the read are
 identified as errors:</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [14]:
+<span></span>In [12]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -768,11 +781,11 @@ wrote to: temp/mixed-trimV.hist
 </div>
 <div class="nboutput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[14]:
+<span></span>Out[12]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.text.Text at 0x106317e48&gt;
+<span></span>&lt;matplotlib.text.Text at 0x105a80e48&gt;
 </pre></div>
 </div>
 </div>
@@ -780,7 +793,7 @@ wrote to: temp/mixed-trimV.hist
 <div class="container">
 </div>
 <div class="container">
-<img alt="_images/manipulating-histograms_23_2.png" src="_images/manipulating-histograms_23_2.png" />
+<img alt="_images/manipulating-histograms_24_2.png" src="_images/manipulating-histograms_24_2.png" />
 </div>
 </div>
 <p>This has the effect of trimming off many errors for the high abundance
@@ -788,45 +801,272 @@ reads, and trimming effectively no low-abundance reads. This is OK: it&#8217;s
 very hard to recover data you&#8217;ve eliminated, and for low-abundance
 reads, we must simply remain unsure of the distinction between &#8220;true&#8221;
 and erroneous k-mers.</p>
-<p>&#64;&#64; Underlying all of this, what we are really trying to do is estimate
+<p>(Underlying all of this, what we are really trying to do is estimate
 whether or not a k-mer belongs to one of two Poisson distributions: the
 &#8220;true k-mer&#8221; Poisson distribution, or the &#8220;erroneous k-mer&#8221; Poisson
-distribution. For each true k-mer, an erroneous k-mer occurs at
-1/(k*3)th... so you&#8217;re essentially sampling from...</p>
+distribution. I am not aware of analytic solutions to this, but they
+might exist &#8211; they would be in Pevzner&#8217;s work on k-mer spectra from the
+early 2000s.)</p>
 </div>
 <div class="section" id="Estimating-per-read-coverage,-more-generally">
 <h3>Estimating per-read coverage, more generally<a class="headerlink" href="#Estimating-per-read-coverage,-more-generally" title="Permalink to this headline">¶</a></h3>
 <p>The ability to estimate a read&#8217;s coverage by looking at k-mer abundances
-is pretty handy, because you can do it reference free and therefore you
-can use it to extract <em>reads</em> from data sets without assembling</p>
+is pretty handy, because you can do it without a reference, and
+therefore you can use it to extract <em>reads</em> from data sets <em>without</em>
+assembling</p>
 <p>(You can&#8217;t use k-mer spectra alone to extract reads, because a read may
 have a mixture of high and low abundance k-mers in it.)</p>
 <p>For example, in the situation above with two species, it is easy to
 extract all of the reads that belong to the high abundance species,
 species A &#8211; simply take any read with an estimated abundance greater
 than 50.</p>
-<p>%%</p>
-<p>There may be other things you can do here too.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">khmer.utils</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">countgraph</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">load_countgraph</span><span class="p">(</span><span class="s1">&#39;temp/mixed-reads.kh&#39;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;temp/mixed-high-abund.fa&#39;</span><span class="p">,</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">screed</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;data/mixed-reads.fa.gz&#39;</span><span class="p">):</span>
+<span class="o">...</span>     <span class="k">if</span> <span class="n">countgraph</span><span class="o">.</span><span class="n">get_median_count</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">sequence</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">:</span>
+<span class="o">...</span>         <span class="n">khmer</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">write_record</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+<span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>abundance-dist-single.py -q -s -M 1e6 -k <span class="m">21</span> temp/mixed-high-abund.fa temp/mixed-high-abund.hist
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">mixed_high</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;temp/mixed-high-abund.hist&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">mixed_high</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">mixed_high</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;high coverage (estimated)&#39;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">mixed_trimV_hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">mixed_trimV_hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;variable coverage trimmed&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">mixed_trim_hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">mixed_trim_hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;hard trimmed&#39;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">axis</span><span class="p">(</span><span class="n">ymax</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;k-mer abundance&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;N k-mers with that abundance&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+making countgraph
+building k-mer tracking graph
+kmer_size: 21
+k-mer countgraph sizes: [227271, 227269, 227267, 227265]
+outputting to temp/mixed-high-abund.hist
+consuming input, round 1 -- temp/mixed-high-abund.fa
+Total number of unique k-mers: 54491
+preparing hist from temp/mixed-high-abund.fa...
+consuming input, round 2 -- temp/mixed-high-abund.fa
+wrote to: temp/mixed-high-abund.hist
+</pre></div></div>
+</div>
+<div class="nboutput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[13]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.text.Text at 0x1062b72b0&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<img alt="_images/manipulating-histograms_27_2.png" src="_images/manipulating-histograms_27_2.png" />
+</div>
+</div>
+<p>Note that here we are taking the high coverage untrimmed (red line) -
+the errors are still there (the bump near x=0), but now they can be
+gotten rid of quite easily now.</p>
 </div>
 <div class="section" id="Normalizing-read-coverages">
 <h3>Normalizing read coverages<a class="headerlink" href="#Normalizing-read-coverages" title="Permalink to this headline">¶</a></h3>
 <p>Let&#8217;s consider the situation above with two species A and B. A is kind
 of a problem &#8211; the bulk of the sequencing data is from A, and we don&#8217;t
-really need 500x coverage to recover the true genome of A.</p>
-<p>We could slice the reads out by coverage, and then subsample the reads
-down to a coverage of 50 or 100 &#8211;</p>
-<p>%%</p>
-<p>&#64;&#64;hmmmm....</p>
-<p>but it turns out we can do something that&#8217;s effectively the same but
-much more efficient: we can collect only the low-coverage reads, and
-discard any high-coverage reads altogether.</p>
-<p>%%</p>
-<p>This is known as &#8220;digital normalization&#8221; of sequencing data, and it&#8217;s an
-efficient and effective way to eliminate redundant sequencing data.</p>
-<p>(When do we discuss online processing and graphs?)</p>
+really need 100x (or 1000x) coverage to recover the true genome of A. Is
+there a way to get rid of some of those reads?</p>
+<p>We could slice high coverage reads out, and then subsample the reads
+down to a coverage of 50x or so; or, we can do something else that turns
+out to be effectively the same thing, but is more efficient - read
+coverage normalization, or &#8220;digital normalization&#8221; in khmer parlance.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>normalize-by-median.py -q -C <span class="m">20</span> -k <span class="m">21</span> -M 1e6 data/mixed-reads.fa.gz -o temp/mixed-norm.fa
+
+<span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>abundance-dist-single.py -q -s -M 1e6 -k <span class="m">21</span> temp/mixed-norm.fa temp/mixed-norm.hist
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">mixed_norm</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;temp/mixed-norm.hist&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">mixed_norm</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">mixed_norm</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;normalized data&#39;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">axis</span><span class="p">(</span><span class="n">ymax</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;k-mer abundance&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;N k-mers with that abundance&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+making countgraph
+building k-mer tracking graph
+kmer_size: 21
+k-mer countgraph sizes: [227271, 227269, 227267, 227265]
+outputting to temp/mixed-norm.hist
+consuming input, round 1 -- temp/mixed-norm.fa
+Total number of unique k-mers: 40385
+preparing hist from temp/mixed-norm.fa...
+consuming input, round 2 -- temp/mixed-norm.fa
+wrote to: temp/mixed-norm.hist
+</pre></div></div>
+</div>
+<div class="nboutput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[14]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.text.Text at 0x106442dd8&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<img alt="_images/manipulating-histograms_30_2.png" src="_images/manipulating-histograms_30_2.png" />
+</div>
+</div>
+<p>What digital normalization is doing is splitting the data in two - into
+<em>reads with novel information</em>, and <em>redundant reads</em>.</p>
+<div class="figure" id="id2">
+<img alt="digital normalization" src="_images/diginorm-separation.jpg" />
+<p class="caption"><span class="caption-text">digital normalization</span></p>
+</div>
 <p>It also has the effect of reducing the error content of data all on its
 own &#8211; because we are discarding reads, we are also discarding errors in
 those reads.</p>
+<p>We don&#8217;t have a good formal analysis of digital normalization, but the
+basic algorithm is:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">read</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">:</span>
+   <span class="k">if</span> <span class="n">estimated_coverage</span><span class="p">(</span><span class="n">read</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">C</span><span class="p">:</span>
+      <span class="n">keep</span><span class="p">(</span><span class="n">read</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal"><span class="pre">estimated_coverage</span></code> is the median k-mer abundance estimator,
+above. This algorithm is:</p>
+<ul class="simple">
+<li>online</li>
+<li>streaming</li>
+<li>sublinear memory</li>
+</ul>
+</div>
+<div class="section" id="Semi-streaming">
+<h3>Semi-streaming<a class="headerlink" href="#Semi-streaming" title="Permalink to this headline">¶</a></h3>
+<p>Digital normalization points the way towards another interesting idea,
+which is that if you can detect when incoming reads have reached high
+coverage, you can start making decisions <em>as the data comes in</em>. This is
+explored in a preprint, <a class="reference external" href="https://peerj.com/preprints/890/">Zhang et al.,
+2014</a>; the basic idea is pictured
+below.</p>
+<div class="figure" id="id3">
+<img alt="semi streaming" src="_images/semi-streaming.jpg" />
+<p class="caption"><span class="caption-text">semi streaming</span></p>
+</div>
+<p>We have software that uses the semi-streaming approach to trim reads -
+so, like filter-abund.py above, but without the need to count all the
+k-mers first:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [15]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>trim-low-abund.py -q -M 1e6 -C <span class="m">3</span> -V -Z <span class="m">20</span> data/mixed-reads.fa.gz -o temp/mixed-trimV-2.fa
+
+<span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>abundance-dist-single.py -q -s -M 1e6 -k <span class="m">21</span> temp/mixed-trimV-2.fa temp/mixed-trimV-2.hist
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">mixed_trimV_hist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;temp/mixed-trimV-2.hist&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">mixed_trimV_hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">mixed_trimV_hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;variable coverage trimmed (streaming)&#39;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">mixed_trim_hist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;temp/mixed-trim.hist&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">plot</span><span class="p">(</span><span class="n">mixed_trim_hist</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">mixed_trim_hist</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;hard trimmed&#39;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">axis</span><span class="p">(</span><span class="n">ymax</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;k-mer abundance&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;N k-mers with that abundance&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+making countgraph
+created temporary directory ./tmpno0p49odkhmer; use -T to change location
+data/mixed-reads.fa.gz: kept aside 2780 of 5508 from first pass, in data/mixed-reads.fa.gz
+second pass: looking at sequences kept aside in ./tmpno0p49odkhmer/mixed-reads.fa.gz.pass2
+removing ./tmpno0p49odkhmer/mixed-reads.fa.gz.pass2
+removing temp directory &amp; contents (./tmpno0p49odkhmer)
+read 5508 reads, 550800 bp
+wrote 4652 reads, 415196 bp
+looked at 2780 reads twice (1.50 passes)
+removed 856 reads and trimmed 1413 reads (41.19%)
+trimmed or removed 24.62% of bases (135604 total)
+5508 reads were high coverage (100.00%);
+skipped 0 reads/0 bases because of low coverage
+fp rate estimated to be 0.001
+output in *.abundtrim
+making countgraph
+building k-mer tracking graph
+kmer_size: 21
+k-mer countgraph sizes: [227271, 227269, 227267, 227265]
+outputting to temp/mixed-trimV-2.hist
+consuming input, round 1 -- temp/mixed-trimV-2.fa
+Total number of unique k-mers: 30227
+preparing hist from temp/mixed-trimV-2.fa...
+consuming input, round 2 -- temp/mixed-trimV-2.fa
+wrote to: temp/mixed-trimV-2.hist
+</pre></div></div>
+</div>
+<div class="nboutput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[15]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.text.Text at 0x10662d588&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<img alt="_images/manipulating-histograms_34_2.png" src="_images/manipulating-histograms_34_2.png" />
+</div>
+</div>
+<p>Perhaps one of the biggest missing pieces of khmer is the lack of a
+formal presentation and analysis of these ideas. Maybe we&#8217;ll write
+something up this fall :).</p>
 </div>
 <div class="section" id="Is-the-true-sequence-still-present?">
 <h3>Is the true sequence still present?<a class="headerlink" href="#Is-the-true-sequence-still-present?" title="Permalink to this headline">¶</a></h3>
@@ -837,7 +1077,49 @@ remain in the data set.</p>
 <p>A simple way to do that (in simulated data) is to use the abundance
 histogram functionality to look to see how many true k-mers are present
 in the read data set.</p>
-<p>%%</p>
+<p>We don&#8217;t have a script to do this, but we can do the reverse - below, we
+ask how many of the true k-mers are <em>missing</em> from the final data set:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [16]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>load-into-counting.py -q -k <span class="m">21</span> -M 1e7 data/mixed-trimV2.fa.kh temp/mixed-trimV-2.fa
+
+<span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>abundance-dist.py -q -s data/mixed-trimV2.fa.kh data/mixed-species.fa.gz temp/mixed-trimV-2.x.species.hist
+<span class="o">&gt;&gt;&gt;</span> <span class="o">!</span>head -2 temp/mixed-trimV-2.x.species.hist
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+Saving k-mer countgraph to data/mixed-trimV2.fa.kh
+Loading kmers from sequences in [&#39;temp/mixed-trimV-2.fa&#39;]
+making countgraph
+consuming input temp/mixed-trimV-2.fa
+Total number of unique k-mers: 30229
+saving data/mixed-trimV2.fa.kh
+fp rate estimated to be 0.000
+DONE.
+wrote to: data/mixed-trimV2.fa.kh.info
+Counting graph from data/mixed-trimV2.fa.kh
+K: 21
+outputting to temp/mixed-trimV-2.x.species.hist
+** squashing existing file temp/mixed-trimV-2.x.species.hist
+preparing hist...
+abundance,count,cumulative,cumulative_fraction
+0,20,20,0.002
+</pre></div></div>
+</div>
+<p>...and the answer is, 0.2%, which is pretty good.</p>
+<hr class="docutils" />
+<p>K-mer abundance histograms are a powerful way to look at &amp; manipulate
+short read data sets, but they are only one way. Next, we will look at
+graph-based approaches.</p>
 <p>Next: <a class="reference external" href="exploring-graphs.html">Exploring graphs</a></p>
 </div>
 </div>

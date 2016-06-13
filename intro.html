@@ -182,14 +182,11 @@ div.nboutput  > :nth-child(2).stderr {
 </style>
 <div class="nbinput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [6]:
+<span></span>In [1]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;/Users/t/dev/khmer&#39;</span><span class="p">)</span>
-
-<span class="kn">import</span> <span class="nn">khmer</span>
+<span></span><span class="kn">import</span> <span class="nn">khmer</span>
 </pre></div>
 </div>
 </div>
@@ -213,7 +210,6 @@ find a repeated k-mer.</p>
 constructing nodes from the k-mers and edges between the nodes as k-1
 overlaps; this graph can also be built with overlaps as nodes and k-mers
 as edges.</p>
-<p>(picture)</p>
 <p>You can also build an <em>implicit</em> graph from the k-mers by simply
 recording all of the k-mers, and then dynamically finding all possible
 neighboring nodes by searching for all k-1 overlaps; for a DNA De Bruijn
@@ -222,9 +218,11 @@ suffixes. For long enough k, there will be no false edges.</p>
 <p>The advantage of the implicit graph is that tracking the edges requires
 memory, while merely tracking the nodes can be done with minimal
 expense.</p>
-<p>(Mention sparseness and k in context of initial paper.)</p>
-<p>(Discuss distributed, and what &#8220;expensive&#8221; means.)</p>
-<p>(Connect to Medjedev paper, and Rizk paper.)</p>
+<ul class="simple">
+<li>Mention sparseness and k in context of initial paper.</li>
+<li>Discuss distributed, and what &#8220;expensive&#8221; means.</li>
+<li>Connect to Medjedev paper, and Rizk paper.</li>
+</ul>
 <p>The core utility of the De Bruijn graph approach to representing
 sequence data is that all of the <em>real</em> paths present in the raw data
 will be paths in the De Bruijn graph, and that these paths can generally
@@ -232,8 +230,22 @@ be distinguished from paths created by sequencing errors in the
 sequencing data. We will discuss this below.</p>
 <div class="section" id="Sequencing-errors,-k-mer-inflation,-and-the-error-catastrophe">
 <h3>Sequencing errors, k-mer inflation, and the error catastrophe<a class="headerlink" href="#Sequencing-errors,-k-mer-inflation,-and-the-error-catastrophe" title="Permalink to this headline">¶</a></h3>
-<p>(solid k-mers, pevzner.)</p>
-<p>(weakness in DBG, indels.)</p>
+<p>The big weakness in De Bruijn graphs is that they rely on k-mers, and
+the population of k-mers can inflate quickly with sequencing error.</p>
+<p>If you consider a read data set with reads of length 100, and an error
+rate of 1%, then on average each read will have one error in it. Each
+error will create up to k novel k-mers, because the erroneous base will
+be present in every k-mer that overlaps it:</p>
+<div class="figure" id="id1">
+<img alt="kmers and errors" src="_images/kmers-and-errors.jpg" />
+<p class="caption"><span class="caption-text">kmers and errors</span></p>
+</div>
+<p>If you do a first-level analysis (ignoring the possibility of duplicate
+error k-mers), with a k=21, for each read you will get 21 novel k-mers
+and 59 repeat k-mers. This inflates quite rapidly to the point where a
+De Bruijn graph has many more erroneous k-mers in it than &#8220;true&#8221; k-mers.</p>
+<p>Luckily you can use the number of times k-mers show up to distinguish
+between erroneous and true k-mers. More on that later.</p>
 </div>
 </div>
 <div class="section" id="How-khmer-works-underneath">
@@ -242,10 +254,12 @@ sequencing data. We will discuss this below.</p>
 filter</a> or <a class="reference external" href="https://en.wikipedia.org/wiki/Count%E2%80%93min_sketch">CountMin
 sketch</a> -
 memory efficient, and fairly fast data structures.</p>
-<p>The details are explored in &#64;citepell and &#64;citeqingpeng, but the basic
-idea is to use a hash table to store presence/absence or abundance
-information without paying attention to collisions. (&#64;&#64;discuss false
-positive rate)</p>
+<p>The details are explored in <a class="reference external" href="http://www.pnas.org/content/109/33/13272.abstract">Pell et al.,
+2012</a> and <a class="reference external" href="http://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0101271">Zhang
+et al.,
+2014</a>,
+but the basic idea is to use a hash table to store presence/absence or
+abundance information without paying attention to collisions.</p>
 <p>These data structures are:</p>
 <ul class="simple">
 <li>simple - the core ideas of khmer can be reimplemented in under a few
@@ -261,6 +275,9 @@ k-mers at any point.</li>
 </ul>
 <p>In exchange we give up a few things:</p>
 <ul class="simple">
+<li>exactly correct counting/presence: there will be a one-sided error, a
+false positive rate, that will show k-mers as being present when
+they&#8217;re not, or more abundant than they actually are.</li>
 <li>elements cannot be directly removed from Bloom filters.</li>
 <li>elements are also anonymous and must be accessed with a handle (that
 is, you must know what k-mer you are looking for; you can&#8217;t retrieve
@@ -289,7 +306,7 @@ it a k-mer size and some other parameters (discussed below).</p>
 <p>Let&#8217;s start with a k-mer size of 7:</p>
 <div class="nbinput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [9]:
+<span></span>In [2]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -302,7 +319,7 @@ it a k-mer size and some other parameters (discussed below).</p>
 track of their count:</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [11]:
+<span></span>In [3]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -320,7 +337,7 @@ track of their count:</p>
 </div>
 <div class="nboutput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[11]:
+<span></span>Out[3]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
@@ -331,7 +348,7 @@ track of their count:</p>
 <p>A Countgraph stores the count of k-mers, up to 255 (8 bits).</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [12]:
+<span></span>In [4]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -349,7 +366,7 @@ track of their count:</p>
 </div>
 <div class="nboutput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[12]:
+<span></span>Out[4]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
@@ -361,7 +378,7 @@ track of their count:</p>
 graph, which, in this case, will be none &#8211;</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [13]:
+<span></span>In [5]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -372,7 +389,7 @@ graph, which, in this case, will be none &#8211;</p>
 </div>
 <div class="nboutput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[13]:
+<span></span>Out[5]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
@@ -383,7 +400,7 @@ graph, which, in this case, will be none &#8211;</p>
 <p>If we add an adjoining k-mer, though &#8211;</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [14]:
+<span></span>In [6]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -395,7 +412,7 @@ graph, which, in this case, will be none &#8211;</p>
 </div>
 <div class="nboutput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[14]:
+<span></span>Out[6]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
@@ -408,21 +425,19 @@ numerically; you can get the neighbor back as a string with the
 <code class="docutils literal"><span class="pre">reverse_hash</span></code> method:</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [17]:
+<span></span>In [7]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
 <span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">ns</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">kmer</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">cg</span><span class="o">.</span><span class="n">reverse_hash</span><span class="p">(</span><span class="n">ns</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="s1">&#39;TGGATGG&#39;</span>
-
-<span class="c1"># @CTB note that forward and reverse are collapsed</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[17]:
+<span></span>Out[7]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
@@ -430,52 +445,49 @@ numerically; you can get the neighbor back as a string with the
 </pre></div>
 </div>
 </div>
-<p>Once you can store k-mers, and find their neighbors, you have the basic
-necessities for working with <em>graphs</em> of k-mers.</p>
-</div>
-<div class="section" id="Where's-the-graph,-then?">
-<h3>Where&#8217;s the graph, then?<a class="headerlink" href="#Where's-the-graph,-then?" title="Permalink to this headline">¶</a></h3>
-<p>This simple concept of &#8220;storing k-mers&#8221; can be used to do a bunch of
-useful things - for example, assembly.</p>
-<p>Let&#8217;s start with a larger K, to avoid repeats &#8211;</p>
-<div class="nbinput nblast container">
+<p>(Note that, because we are dealing with DNA, we collapse forward and
+reverse-complement k-mers.)</p>
+<div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [18]:
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">hash</span><span class="p">(</span><span class="s1">&#39;TGGATGG&#39;</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">hash</span><span class="p">(</span><span class="s1">&#39;CCATCCA&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+7967
+7967
+</pre></div></div>
+</div>
+<p>In general, we don&#8217;t want to work with individual k-mers - we want to
+work with sequences of them.</p>
+<p>khmer has lots of functions for working with sequences longer than the
+k-mer size. This starts with <em>consuming</em> them, which loads each k-mer in
+the sequence into the given table:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [9]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
 <span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">K</span> <span class="o">=</span> <span class="mi">21</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">Nodegraph</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<p>&#64;&#64;traverse?</p>
-<p>Now, suppose we have a sequence longer than K:</p>
-<div class="nbinput nblast container">
-<div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [20]:
-</pre></div>
-</div>
-<div class="highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">seq</span> <span class="o">=</span> <span class="s1">&#39;CCCTGTTAGCTACGTCCGTCTAAGGATATTAACATAGTTGCGACTGCGTCCTGTGCTCA&#39;</span>
-</pre></div>
-</div>
-</div>
-<p>We can add it to the graph with <code class="docutils literal"><span class="pre">consume</span></code> (which returns the number of
-k-mers consumed):</p>
-<div class="nbinput container">
-<div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [27]:
-</pre></div>
-</div>
-<div class="highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cg</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">Countgraph</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">seq</span> <span class="o">=</span> <span class="s1">&#39;CCCTGTTAGCTACGTCCGTCTAAGGATATTAACATAGTTGCGACTGCGTCCTGTGCTCA&#39;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cg</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[27]:
+<span></span>Out[9]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
@@ -483,21 +495,122 @@ k-mers consumed):</p>
 </pre></div>
 </div>
 </div>
-<p>and we can now traverse it from one end to the other like so:</p>
+<p>You can now do things like ask for the counts of all of the kmers in
+that sequence (which will be &#8216;1&#8217;, since we&#8217;ve only loaded it once...)</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [28]:
+<span></span>In [10]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">start_kmer</span> <span class="o">=</span> <span class="n">seq</span><span class="p">[:</span><span class="n">K</span><span class="p">]</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">assemble_linear_path</span><span class="p">(</span><span class="n">start_kmer</span><span class="p">)</span>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">cg</span><span class="o">.</span><span class="n">get_kmer_counts</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[28]:
+<span></span>Out[10]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>[1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1]
+</pre></div>
+</div>
+</div>
+<p>You can also ask for statistics on the sequence, such as the median,
+average, and stddev of the k-mer counts in it:</p>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">median</span><span class="p">,</span> <span class="n">avg</span><span class="p">,</span> <span class="n">stddev</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">get_median_count</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Where's-the-graph,-then?">
+<h3>Where&#8217;s the graph, then?<a class="headerlink" href="#Where's-the-graph,-then?" title="Permalink to this headline">¶</a></h3>
+<p>Once you can store k-mers, and find their neighbors, you have the basic
+necessities for working with <em>graphs</em> of k-mers. This can be used to do
+a bunch of useful things - for example, assembly.</p>
+<p>Here we&#8217;ll use a <code class="docutils literal"><span class="pre">Nodegraph</span></code>, which doesn&#8217;t track counts:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span> <span class="o">=</span> <span class="n">khmer</span><span class="o">.</span><span class="n">Nodegraph</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[12]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>39
+</pre></div>
+</div>
+</div>
+<p>If the sequence produces a linear path within the graph (which this one
+does), we can now traverse it from one end to the other like so:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">seed_kmer</span> <span class="o">=</span> <span class="s1">&#39;CCCTGTTAGCTACGTCCGTCT&#39;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">assemble_linear_path</span><span class="p">(</span><span class="n">seed_kmer</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[13]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
@@ -505,19 +618,43 @@ k-mers consumed):</p>
 </pre></div>
 </div>
 </div>
-<p>That, in a nutshell, is what assemblers do.</p>
-<p>Things to mention &#64;CTB:</p>
-<ul class="simple">
-<li>can use reads as index into graphs &amp; for graph paths</li>
-</ul>
+<p>Note that you can start with any k-mer in the path &#8211; above, we started
+with the first one, but we can also start with one taken from the
+middle:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">seed_kmer</span> <span class="o">=</span> <span class="s1">&#39;CCGTCTAAGGATATTAACATA&#39;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ng</span><span class="o">.</span><span class="n">assemble_linear_path</span><span class="p">(</span><span class="n">seed_kmer</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[14]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>&#39;TGAGCACAGGACGCAGTCGCAACTATGTTAATATCCTTAGACGGACGTAGCTAACAGGG&#39;
+</pre></div>
+</div>
+</div>
+<p>We&#8217;ll go a little bit more into assembly (and the limitations of these
+functions) in the section on exploring graphs.</p>
 </div>
 <div class="section" id="Working-with-files-and-sequences">
 <h3>Working with files and sequences<a class="headerlink" href="#Working-with-files-and-sequences" title="Permalink to this headline">¶</a></h3>
+<p>khmer doesn&#8217;t care how you get the sequences; it takes in any valid DNA
+string. We do have some libraries that we&#8217;ve built ourselves, though,
+that make it quite easy.</p>
 <p>You can load sequences from files using the <a class="reference external" href="https://screed.readthedocs.io/">screed
 library</a>. Briefly,</p>
 <div class="nbinput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [33]:
+<span></span>In [15]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -529,11 +666,12 @@ library</a>. Briefly,</p>
 </div>
 </div>
 <p>This approach gives you lots of easy manipulation of things in Python.
-You can also use the built-in function on graphs, <code class="docutils literal"><span class="pre">consume_fasta</span></code>,
-which returns the number of reads and the number of k-mers consumed:</p>
+You can also use the built-in function on graph objects,
+<code class="docutils literal"><span class="pre">consume_fasta</span></code>, which returns the number of reads and the number of
+k-mers consumed:</p>
 <div class="nbinput container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>In [34]:
+<span></span>In [16]:
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
@@ -544,11 +682,11 @@ which returns the number of reads and the number of k-mers consumed:</p>
 </div>
 <div class="nboutput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>Out[34]:
+<span></span>Out[16]:
 </pre></div>
 </div>
 <div class="highlight-none"><div class="highlight"><pre>
-<span></span>(666, 86580)
+<span></span>(20000, 1600000)
 </pre></div>
 </div>
 </div>
@@ -562,9 +700,41 @@ Nodegraph and Countgraph structures don&#8217;t actually keep track of the
 actual k-mer; this means you can&#8217;t ask the data structures for a list of
 the k-mers they contain. So you always have to know what k-mer you&#8217;re
 asking about. In practice, this means you need a starting point.</p>
-<p>Extracting the error rate. The error rate really doesn&#8217;t matter in the
-context of real data.</p>
-<p>Allocating memory up front.</p>
+<p>In each of the examples above, we&#8217;ve specified how much memory we&#8217;re
+going to give the graph up front. This is, again, because of the way we
+store k-mers &#8211; in Bloom filters and CountMin sketches. If you try to
+stuff too many k-mers into these data structures, you will end up
+swamping the graphs with false positive k-mers. We&#8217;ve done some formal
+as well as some empirical analyses in <a class="reference external" href="http://www.pnas.org/content/109/33/13272.abstract">Pell et al.,
+2012</a> and <a class="reference external" href="http://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0101271">Zhang
+et al.,
+2014</a>,
+but the general rule is that &#8220;more memory is better&#8221;.</p>
+<p>If you&#8217;re interested in extracting the estimated false positive rate,
+you can do that with <code class="docutils literal"><span class="pre">calc_expected_collisions</span></code>, which will give you
+the FP rate based on the data structure loading so far:</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [17]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">khmer</span><span class="o">.</span><span class="n">calc_expected_collisions</span><span class="p">(</span><span class="n">ng</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[17]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>0.0028394400664437528
+</pre></div>
+</div>
+</div>
+<p>...but the basic version is that for most real analyses, a few gigabytes
+is more than enough.</p>
 <p>Next: <a class="reference external" href="manipulating-histograms.html">Manipulating k-mer abundance
 histograms</a></p>
 </div>

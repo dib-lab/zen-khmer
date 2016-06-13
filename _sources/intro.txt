@@ -2,15 +2,12 @@
  "cells": [
   {
    "cell_type": "code",
-   "execution_count": 6,
+   "execution_count": 1,
    "metadata": {
     "collapsed": true
    },
    "outputs": [],
    "source": [
-    "import sys\n",
-    "sys.path.insert(0, '/Users/t/dev/khmer')\n",
-    "\n",
     "import khmer"
    ]
   },
@@ -43,8 +40,6 @@
     "k-1 overlaps; this graph can also be built with overlaps as nodes\n",
     "and k-mers as edges.\n",
     "\n",
-    "(picture)\n",
-    "\n",
     "You can also build an *implicit* graph from the k-mers by simply\n",
     "recording all of the k-mers, and then dynamically finding all possible\n",
     "neighboring nodes by searching for all k-1 overlaps; for a DNA De\n",
@@ -55,11 +50,9 @@
     "The advantage of the implicit graph is that tracking the edges requires\n",
     "memory, while merely tracking the nodes can be done with minimal expense.\n",
     "\n",
-    "(Mention sparseness and k in context of initial paper.)\n",
-    "\n",
-    "(Discuss distributed, and what \"expensive\" means.)\n",
-    "\n",
-    "(Connect to Medjedev paper, and Rizk paper.)\n",
+    "* Mention sparseness and k in context of initial paper.\n",
+    "* Discuss distributed, and what \"expensive\" means.\n",
+    "* Connect to Medjedev paper, and Rizk paper.\n",
     "\n",
     "The core utility of the De Bruijn graph approach to representing\n",
     "sequence data is that all of the *real* paths present in the raw data\n",
@@ -74,9 +67,16 @@
    "source": [
     "### Sequencing errors, k-mer inflation, and the error catastrophe\n",
     "\n",
-    "(solid k-mers, pevzner.)\n",
+    "The big weakness in De Bruijn graphs is that they rely on k-mers, and the population of k-mers can inflate quickly with sequencing error.\n",
     "\n",
-    "(weakness in DBG, indels.)"
+    "If you consider a read data set with reads of length 100, and an error rate of 1%, then on average each read will have one error in it.  Each error will create up to k novel k-mers, because the erroneous base will be present in every k-mer that overlaps it:\n",
+    "\n",
+    "![kmers and errors](zaok-slides/kmers-and-errors.jpg)\n",
+    "\n",
+    "If you do a first-level analysis (ignoring the possibility of duplicate error k-mers), with a k=21, for each\n",
+    "read you will get 21 novel k-mers and 59 repeat k-mers.  This inflates quite rapidly to the point where a De Bruijn graph has many more erroneous k-mers in it than \"true\" k-mers.\n",
+    "\n",
+    "Luckily you can use the number of times k-mers show up to distinguish between erroneous and true k-mers. More on that later."
    ]
   },
   {
@@ -90,9 +90,9 @@
     "[CountMin sketch](https://en.wikipedia.org/wiki/Count%E2%80%93min_sketch) -\n",
     "memory efficient, and fairly fast data structures.\n",
     "\n",
-    "The details are explored in @citepell and @citeqingpeng, but the\n",
+    "The details are explored in [Pell et al., 2012](http://www.pnas.org/content/109/33/13272.abstract) and [Zhang et al., 2014](http://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0101271), but the\n",
     "basic idea is to use a hash table to store presence/absence or abundance\n",
-    "information without paying attention to collisions.  (@@discuss false positive rate)\n",
+    "information without paying attention to collisions.\n",
     "\n",
     "These data structures are:\n",
     "\n",
@@ -112,6 +112,9 @@
     "  any point.\n",
     "\n",
     "In exchange we give up a few things:\n",
+    "\n",
+    "* exactly correct counting/presence: there will be a one-sided error, a false positive rate, that will\n",
+    "  show k-mers as being present when they're not, or more abundant than they actually are.\n",
     "\n",
     "* elements cannot be directly removed from Bloom filters.\n",
     "\n",
@@ -159,7 +162,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 9,
+   "execution_count": 2,
    "metadata": {
     "collapsed": true
    },
@@ -179,7 +182,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 11,
+   "execution_count": 3,
    "metadata": {
     "collapsed": false
    },
@@ -190,7 +193,7 @@
        "1"
       ]
      },
-     "execution_count": 11,
+     "execution_count": 3,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -216,7 +219,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 12,
+   "execution_count": 4,
    "metadata": {
     "collapsed": false
    },
@@ -227,7 +230,7 @@
        "2"
       ]
      },
-     "execution_count": 12,
+     "execution_count": 4,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -254,7 +257,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 13,
+   "execution_count": 5,
    "metadata": {
     "collapsed": false
    },
@@ -265,7 +268,7 @@
        "[]"
       ]
      },
-     "execution_count": 13,
+     "execution_count": 5,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -284,7 +287,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 14,
+   "execution_count": 6,
    "metadata": {
     "collapsed": false
    },
@@ -295,7 +298,7 @@
        "[5555]"
       ]
      },
-     "execution_count": 14,
+     "execution_count": 6,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -316,7 +319,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 17,
+   "execution_count": 7,
    "metadata": {
     "collapsed": false
    },
@@ -327,7 +330,7 @@
        "'TGGATGG'"
       ]
      },
-     "execution_count": 17,
+     "execution_count": 7,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -335,72 +338,50 @@
    "source": [
     ">>> ns = cg.neighbors(kmer)\n",
     ">>> cg.reverse_hash(ns[0])\n",
-    "'TGGATGG'\n",
-    "\n",
-    "# @CTB note that forward and reverse are collapsed"
+    "'TGGATGG'"
    ]
   },
   {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "Once you can store k-mers, and find their neighbors, you have the basic necessities for working with *graphs* of k-mers."
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "### Where's the graph, then?\n",
-    "\n",
-    "This simple concept of \"storing k-mers\" can be used to do a bunch of\n",
-    "useful things - for example, assembly.\n",
-    "\n",
-    "Let's start with a larger K, to avoid repeats --"
+    "(Note that, because we are dealing with DNA, we collapse forward and reverse-complement k-mers.)"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 18,
+   "execution_count": 8,
    "metadata": {
-    "collapsed": true
+    "collapsed": false
    },
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "7967\n",
+      "7967\n"
+     ]
+    }
+   ],
    "source": [
-    ">>> K = 21\n",
-    ">>> ng = khmer.Nodegraph(K, 1e6, 4)"
+    ">>> print(cg.hash('TGGATGG'))\n",
+    ">>> print(cg.hash('CCATCCA'))"
    ]
   },
   {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "@@traverse?\n",
+    "In general, we don't want to work with individual k-mers - we want to work with sequences of them.\n",
     "\n",
-    "Now, suppose we have a sequence longer than K:"
+    "khmer has lots of functions for working with sequences longer than the k-mer size.  This starts\n",
+    "with *consuming* them, which loads each k-mer in the sequence into the given table:"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 20,
-   "metadata": {
-    "collapsed": true
-   },
-   "outputs": [],
-   "source": [
-    ">>> seq = 'CCCTGTTAGCTACGTCCGTCTAAGGATATTAACATAGTTGCGACTGCGTCCTGTGCTCA'"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "We can add it to the graph with ``consume`` (which returns the number of k-mers consumed):"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 27,
+   "execution_count": 9,
    "metadata": {
     "collapsed": false
    },
@@ -411,12 +392,135 @@
        "39"
       ]
      },
-     "execution_count": 27,
+     "execution_count": 9,
      "metadata": {},
      "output_type": "execute_result"
     }
    ],
    "source": [
+    ">>> K = 21\n",
+    ">>> cg = khmer.Countgraph(K, 1e6, 4)\n",
+    ">>> seq = 'CCCTGTTAGCTACGTCCGTCTAAGGATATTAACATAGTTGCGACTGCGTCCTGTGCTCA'\n",
+    ">>> cg.consume(seq)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "You can now do things like ask for the counts of all of the kmers in that sequence (which will be '1', since we've only loaded it once...)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1,\n",
+       " 1]"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    ">>> cg.get_kmer_counts(seq)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "You can also ask for statistics on the sequence, such as the median, average, and stddev of the k-mer counts in it:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    ">>> median, avg, stddev = cg.get_median_count(seq)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Where's the graph, then?\n",
+    "\n",
+    "Once you can store k-mers, and find their neighbors, you have the basic necessities for working with *graphs* of k-mers.  This can be used to do a bunch of\n",
+    "useful things - for example, assembly.\n",
+    "\n",
+    "Here we'll use a `Nodegraph`, which doesn't track counts:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "39"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    ">>> ng = khmer.Nodegraph(K, 1e6, 4)\n",
     ">>> ng.consume(seq)"
    ]
   },
@@ -424,12 +528,12 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "and we can now traverse it from one end to the other like so:"
+    "If the sequence produces a linear path within the graph (which this one does), we can now traverse it from one end to the other like so:"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 28,
+   "execution_count": 13,
    "metadata": {
     "collapsed": false
    },
@@ -440,30 +544,52 @@
        "'TGAGCACAGGACGCAGTCGCAACTATGTTAATATCCTTAGACGGACGTAGCTAACAGGG'"
       ]
      },
-     "execution_count": 28,
+     "execution_count": 13,
      "metadata": {},
      "output_type": "execute_result"
     }
    ],
    "source": [
-    ">>> start_kmer = seq[:K]\n",
-    ">>> ng.assemble_linear_path(start_kmer)"
+    ">>> seed_kmer = 'CCCTGTTAGCTACGTCCGTCT'\n",
+    ">>> ng.assemble_linear_path(seed_kmer)"
    ]
   },
   {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "That, in a nutshell, is what assemblers do."
+    "Note that you can start with any k-mer in the path -- above, we started with the first one, but we can also start with one taken from the middle:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'TGAGCACAGGACGCAGTCGCAACTATGTTAATATCCTTAGACGGACGTAGCTAACAGGG'"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    ">>> seed_kmer = 'CCGTCTAAGGATATTAACATA'\n",
+    ">>> ng.assemble_linear_path(seed_kmer)"
    ]
   },
   {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "Things to mention @CTB:\n",
-    "\n",
-    "* can use reads as index into graphs & for graph paths"
+    "We'll go a little bit more into assembly (and the limitations of these functions) in the section on exploring graphs.\n",
+    "\n"
    ]
   },
   {
@@ -472,12 +598,14 @@
    "source": [
     "### Working with files and sequences\n",
     "\n",
+    "khmer doesn't care how you get the sequences; it takes in any valid DNA string.  We do have some libraries that we've built ourselves, though, that make it quite easy.\n",
+    "\n",
     "You can load sequences from files using the [screed library](https://screed.readthedocs.io/).  Briefly,"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 33,
+   "execution_count": 15,
    "metadata": {
     "collapsed": false
    },
@@ -493,12 +621,12 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "This approach gives you lots of easy manipulation of things in Python.  You can also use the built-in function on graphs, `consume_fasta`, which returns the number of reads and the number of k-mers consumed:"
+    "This approach gives you lots of easy manipulation of things in Python.  You can also use the built-in function on graph objects, `consume_fasta`, which returns the number of reads and the number of k-mers consumed:"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 34,
+   "execution_count": 16,
    "metadata": {
     "collapsed": false
    },
@@ -506,10 +634,10 @@
     {
      "data": {
       "text/plain": [
-       "(666, 86580)"
+       "(20000, 1600000)"
       ]
      },
-     "execution_count": 34,
+     "execution_count": 16,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -539,10 +667,42 @@
     "you're asking about.  In practice, this means you need a starting\n",
     "point.\n",
     "\n",
-    "Extracting the error rate.\n",
-    "The error rate really doesn't matter in the context of real data.\n",
+    "In each of the examples above, we've specified how much memory we're going to give the graph up front.\n",
+    "This is, again, because of the way we store k-mers -- in Bloom filters and CountMin sketches.  If you try\n",
+    "to stuff too many k-mers into these data structures, you will end up swamping the graphs with false positive\n",
+    "k-mers.  We've done some formal as well as some empirical analyses in [Pell et al., 2012](http://www.pnas.org/content/109/33/13272.abstract) and [Zhang et al., 2014](http://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0101271), but the general rule is that \"more memory is better\".\n",
     "\n",
-    "Allocating memory up front."
+    "If you're interested in extracting the estimated false positive rate, you can do that with\n",
+    "`calc_expected_collisions`, which will give you the FP rate based on the data structure loading so far:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.0028394400664437528"
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    ">>> khmer.calc_expected_collisions(ng)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "...but the basic version is that for most real analyses, a few gigabytes is more than enough."
    ]
   },
   {
