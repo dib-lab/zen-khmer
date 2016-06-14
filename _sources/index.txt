@@ -20,8 +20,8 @@ Contents:
    actually-using-khmer
    off-label-and-emerging-use-cases
    
-   considerations
    infrastructure
+   considerations
    future-thoughts
 
    blog-posts
