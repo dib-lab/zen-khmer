@@ -198,6 +198,15 @@ soil metagenomes in <a class="reference external" href="www.pnas.org/content/111
 <li>k-mer size k &lt; k_0 issue: if you partition at a low k-mer size, all higher
 k paths remain.</li>
 </ul>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<p>To try it out:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">do</span><span class="o">-</span><span class="n">partition</span><span class="o">.</span><span class="n">py</span> <span class="n">data</span><span class="o">/</span><span class="n">mixed</span><span class="o">-</span><span class="n">reads</span><span class="o">.</span><span class="n">fa</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">extract</span><span class="o">-</span><span class="n">partitions</span><span class="o">.</span><span class="n">py</span> <span class="n">mx</span> <span class="n">mixed</span><span class="o">-</span><span class="n">reads</span><span class="o">.</span><span class="n">fa</span><span class="o">.</span><span class="n">gz</span><span class="o">.</span><span class="n">part</span>  <span class="o">--</span><span class="nb">max</span><span class="o">-</span><span class="n">size</span> <span class="mi">5</span>
+</pre></div>
+</div>
+<p>This will produce <code class="docutils literal"><span class="pre">mx.group*.fa</span></code>.</p>
+</div>
 </div>
 <div class="section" id="recipes">
 <h2>Recipes<a class="headerlink" href="#recipes" title="Permalink to this headline">¶</a></h2>

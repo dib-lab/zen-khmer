@@ -96,7 +96,39 @@ spacegraphcats, domination hierarchies, and the catlas
 
 * species separation & better species partitioning
 
-(presentation)
+(`presentation <http://athyra.idyll.org/~t/transfer/2016-utsw-spacegraphcats.pptx>`__)
+
+Thoughts:
+
+* Structural variation analysis
+* Species binning
+* RNAseq exploration and downsampling
+
+Quick demo - run from within `spacegraphcats
+<https://github.com/spacegraphcats/spacegraphcats>`__ repo, and have
+the ``oldhash`` branch of ``sourmash
+<https://github.com/dib-lab/sourmash>`__ in your path.  First, build
+the catlas::
+
+  mkdir acido
+
+  # build compact de bruijn graph (*.gxt) with MinHashes attached (*.mxt)
+  spacegraphcats/walk-dbg.py -x 4e9 data/Acido-ncbi.fasta -o acido/acido.gxt
+
+  # build domsets and catlas
+  spacegraphcats/build-catlas.py acido 5
+
+  # build GML file for visualization
+  spacegraphcats/gxt_to_gml.py acido/acido.domgraph.5.gxt acido/acido.domgraph.5.gml
+
+To search w/MinHash sketches, build a signature & dump it::
+
+  ../sourmash/sourmash compute data/acido-short.fa
+  ../sourmash/sourmash dump acido-short.fa.sig
+
+Then, search::
+  
+  spacegraphcats/search-catlas-levels.py acido acido-short.fa.sigdump.txt 
 
 Future directions
 =================
@@ -105,6 +137,4 @@ In no particular order,
 
 * Streaming assembly
 * Graph indexing of short- (and long?)-read data sets
-* Structural variation analysis
 * Graph searching more generally
-* RNAseq exploration and downsampling

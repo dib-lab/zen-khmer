@@ -187,6 +187,16 @@ Note:
 * k-mer size k < k_0 issue: if you partition at a low k-mer size, all higher
   k paths remain.
 
+Example
+-------
+
+To try it out::
+
+  do-partition.py data/mixed-reads.fa.gz
+  extract-partitions.py mx mixed-reads.fa.gz.part  --max-size 5
+
+This will produce ``mx.group*.fa``.
+
 Recipes
 =======
 

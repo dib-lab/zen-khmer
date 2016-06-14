@@ -123,7 +123,38 @@ spacegraphcats, below.</p>
 <ul class="simple">
 <li>species separation &amp; better species partitioning</li>
 </ul>
-<p>(presentation)</p>
+<p>(<a class="reference external" href="http://athyra.idyll.org/~t/transfer/2016-utsw-spacegraphcats.pptx">presentation</a>)</p>
+<p>Thoughts:</p>
+<ul class="simple">
+<li>Structural variation analysis</li>
+<li>Species binning</li>
+<li>RNAseq exploration and downsampling</li>
+</ul>
+<p>Quick demo - run from within <a class="reference external" href="https://github.com/spacegraphcats/spacegraphcats">spacegraphcats</a> repo, and have
+the <code class="docutils literal"><span class="pre">oldhash</span></code> branch of <a href="#id1"><span class="problematic" id="id2">``</span></a>sourmash
+&lt;<a class="reference external" href="https://github.com/dib-lab/sourmash">https://github.com/dib-lab/sourmash</a>&gt;`__ in your path.  First, build
+the catlas:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">acido</span>
+
+<span class="c1"># build compact de bruijn graph (*.gxt) with MinHashes attached (*.mxt)</span>
+<span class="n">spacegraphcats</span><span class="o">/</span><span class="n">walk</span><span class="o">-</span><span class="n">dbg</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">x</span> <span class="mi">4</span><span class="n">e9</span> <span class="n">data</span><span class="o">/</span><span class="n">Acido</span><span class="o">-</span><span class="n">ncbi</span><span class="o">.</span><span class="n">fasta</span> <span class="o">-</span><span class="n">o</span> <span class="n">acido</span><span class="o">/</span><span class="n">acido</span><span class="o">.</span><span class="n">gxt</span>
+
+<span class="c1"># build domsets and catlas</span>
+<span class="n">spacegraphcats</span><span class="o">/</span><span class="n">build</span><span class="o">-</span><span class="n">catlas</span><span class="o">.</span><span class="n">py</span> <span class="n">acido</span> <span class="mi">5</span>
+
+<span class="c1"># build GML file for visualization</span>
+<span class="n">spacegraphcats</span><span class="o">/</span><span class="n">gxt_to_gml</span><span class="o">.</span><span class="n">py</span> <span class="n">acido</span><span class="o">/</span><span class="n">acido</span><span class="o">.</span><span class="n">domgraph</span><span class="o">.</span><span class="mf">5.</span><span class="n">gxt</span> <span class="n">acido</span><span class="o">/</span><span class="n">acido</span><span class="o">.</span><span class="n">domgraph</span><span class="o">.</span><span class="mf">5.</span><span class="n">gml</span>
+</pre></div>
+</div>
+<p>To search w/MinHash sketches, build a signature &amp; dump it:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">../</span><span class="n">sourmash</span><span class="o">/</span><span class="n">sourmash</span> <span class="n">compute</span> <span class="n">data</span><span class="o">/</span><span class="n">acido</span><span class="o">-</span><span class="n">short</span><span class="o">.</span><span class="n">fa</span>
+<span class="o">../</span><span class="n">sourmash</span><span class="o">/</span><span class="n">sourmash</span> <span class="n">dump</span> <span class="n">acido</span><span class="o">-</span><span class="n">short</span><span class="o">.</span><span class="n">fa</span><span class="o">.</span><span class="n">sig</span>
+</pre></div>
+</div>
+<p>Then, search:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">spacegraphcats</span><span class="o">/</span><span class="n">search</span><span class="o">-</span><span class="n">catlas</span><span class="o">-</span><span class="n">levels</span><span class="o">.</span><span class="n">py</span> <span class="n">acido</span> <span class="n">acido</span><span class="o">-</span><span class="n">short</span><span class="o">.</span><span class="n">fa</span><span class="o">.</span><span class="n">sigdump</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="future-directions">
@@ -132,9 +163,7 @@ spacegraphcats, below.</p>
 <ul class="simple">
 <li>Streaming assembly</li>
 <li>Graph indexing of short- (and long?)-read data sets</li>
-<li>Structural variation analysis</li>
 <li>Graph searching more generally</li>
-<li>RNAseq exploration and downsampling</li>
 </ul>
 </div>
 </div>

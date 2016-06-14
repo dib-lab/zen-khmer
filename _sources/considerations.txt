@@ -64,10 +64,23 @@ biology.  However, it is hard to make such arguments to funding agencies.
 We don't expect other people to use our software...
 ===================================================
 
-See alt implementations.
+There are lots of reasons for people not to invest in using khmer:
+wrong language, spotty support, etc.  And this is completely OK by me:
+khmer is about exploring useful research ideas and boiling them down to
+simple concepts that are as simple as possible to reimplement.
 
-...but stability is still a core value
-======================================
+For example, digital normalization is a three line algorithm.  Because
+of this simplicity, there are at least four approximate
+re-implementations of it roaming about:
+
+* Trinity's `in silico normalization <http://ivory.idyll.org/blog/trinity-in-silico-normalize.html>`__
+* NeatFreq from JCVI - `paper <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4245761/>`__
+* BBNorm from JGI - `link <http://seqanswers.com/forums/showthread.php?t=49763>`__
+* Mira - `link <http://mira-assembler.sourceforge.net/docs/DefinitiveGuideToMIRA.html#sect_ref_data_reduction>`__
+
+...but stability of our software is still a core value
+======================================================
 
 We and others use our software to do things, not just to explore concepts
-in bioinformatics and software development.
+in bioinformatics and software development.  Therefore we should minimize
+churn.
