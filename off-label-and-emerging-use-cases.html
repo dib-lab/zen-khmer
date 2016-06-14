@@ -25,8 +25,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="zaok 0.1 documentation" href="index.html" />
-    <link rel="next" title="Blog posts so far" href="blog-posts.html" />
-    <link rel="prev" title="Infrastructure and development for the khmer project" href="infrastructure.html" /> 
+    <link rel="next" title="Perspectives and considerations" href="considerations.html" />
+    <link rel="prev" title="Using khmer on real data" href="actually-using-khmer.html" /> 
   </head>
   <body role="document">
       <div class="header" role="banner"><h1 class="heading"><a href="index.html">
@@ -36,11 +36,11 @@
       <div class="topnav" role="navigation" aria-label="top navigation">
       
         <p>
-        «&#160;&#160;<a href="infrastructure.html">Infrastructure and development for the khmer project</a>
+        «&#160;&#160;<a href="actually-using-khmer.html">Using khmer on real data</a>
         &#160;&#160;::&#160;&#160;
         <a class="uplink" href="index.html">Contents</a>
         &#160;&#160;::&#160;&#160;
-        <a href="blog-posts.html">Blog posts so far</a>&#160;&#160;»
+        <a href="considerations.html">Perspectives and considerations</a>&#160;&#160;»
         </p>
 
       </div>
@@ -51,61 +51,91 @@
 <h1>Off label and emerging use cases<a class="headerlink" href="#off-label-and-emerging-use-cases" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="underpublicized-tools">
 <h2>Underpublicized tools<a class="headerlink" href="#underpublicized-tools" title="Permalink to this headline">¶</a></h2>
-<p>HLL</p>
-<p>Xander</p>
+<div class="section" id="hyperloglog">
+<h3>HyperLogLog<a class="headerlink" href="#hyperloglog" title="Permalink to this headline">¶</a></h3>
+<p>Count numer of unique k-mers very efficiently.  Can be used in
+streaming/observation mode.</p>
+<p><a class="reference external" href="http://biorxiv.org/content/early/2016/06/07/056846">Preprint</a></p>
+</div>
+<div class="section" id="xander">
+<h3>Xander<a class="headerlink" href="#xander" title="Permalink to this headline">¶</a></h3>
+<p>Assemble directly from the graph using protein Hidden Markov Models.
+Note, Xander is implemented in Java, and is not built into khmer.</p>
+<p><a class="reference external" href="https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6">Paper</a></p>
+</div>
+<div class="section" id="sourmash">
+<h3>sourmash<a class="headerlink" href="#sourmash" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://sourmash.readthedocs.io/en/latest/">Documentation/paper</a>. MinHash
+sketches. Note, the library is directly integrated into khmer; see
+spacegraphcats, below.</p>
+<p>Blog posts: <a class="reference external" href="http://ivory.idyll.org/blog/2016-sourmash.html">http://ivory.idyll.org/blog/2016-sourmash.html</a> and
+<a class="reference external" href="http://ivory.idyll.org/blog/2016-sourmash-signatures.html">http://ivory.idyll.org/blog/2016-sourmash-signatures.html</a></p>
+</div>
+<div class="section" id="screed">
+<h3>screed<a class="headerlink" href="#screed" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://screed.readthedocs.io">Documentation</a>.</p>
+<p>Pretty useful, but unpublished. Perhaps a <a class="reference external" href="http://joss.theoj.org">JOSS pub?</a></p>
+</div>
 </div>
 <div class="section" id="applying-existing-tools-to-new-problems">
 <h2>Applying existing tools to new problems<a class="headerlink" href="#applying-existing-tools-to-new-problems" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="diginorm-for-genomes">
+<h3>Diginorm for genomes<a class="headerlink" href="#diginorm-for-genomes" title="Permalink to this headline">¶</a></h3>
+<p>Digital normalzation can be used on really messy genome sequencing data:
+<a class="reference external" href="https://www.ncbi.nlm.nih.gov/pubmed/23985341">https://www.ncbi.nlm.nih.gov/pubmed/23985341</a></p>
+</div>
 <div class="section" id="diginorm-for-reference-based-work">
 <h3>diginorm for reference-based work<a class="headerlink" href="#diginorm-for-reference-based-work" title="Permalink to this headline">¶</a></h3>
-<p>Tamer&#8217;s work with cufflinks and variant calling.</p>
+<p>(Tamer&#8217;s work with cufflinks and variant calling.)</p>
+<p>(Erich&#8217;s work with RNA scaffolding.)</p>
 </div>
 <div class="section" id="k-mer-baiting">
 <h3>k-mer baiting<a class="headerlink" href="#k-mer-baiting" title="Permalink to this headline">¶</a></h3>
-<p>Jaron&#8217;s work on extracting 16s.</p>
+<p>(Jaron&#8217;s work on extracting 16s.)</p>
 </div>
-</div>
-<div class="section" id="unpublished">
-<h2>Unpublished<a class="headerlink" href="#unpublished" title="Permalink to this headline">¶</a></h2>
-<p>Streaming.</p>
 </div>
 <div class="section" id="unpreprinted-fodder">
 <h2>Unpreprinted fodder<a class="headerlink" href="#unpreprinted-fodder" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="graph-alignment-error-correction-and-variant-calling">
 <h3>Graph alignment, error correction, and variant calling<a class="headerlink" href="#graph-alignment-error-correction-and-variant-calling" title="Permalink to this headline">¶</a></h3>
-<p>Read graphs, more generally.</p>
+<p>Read-to-graph alignment: <a class="reference external" href="http://ivory.idyll.org/blog/2015-wok-error-correction.html">http://ivory.idyll.org/blog/2015-wok-error-correction.html</a></p>
+<p>Variant calling: <a class="reference external" href="http://ivory.idyll.org/blog/2015-wok-variant-calling.html">http://ivory.idyll.org/blog/2015-wok-variant-calling.html</a></p>
+<p>Note that this functionality can be used on any kind of graph
+(normalized, abundance-filtered, etc.)</p>
+<p>More generally, <em>read graphs</em> seem useful...</p>
 </div>
 <div class="section" id="igs">
 <h3>IGS<a class="headerlink" href="#igs" title="Permalink to this headline">¶</a></h3>
+<p>Reads are windows into the graphs and can be used across data sets.
+(IGS presentation.)</p>
 </div>
 </div>
 <div class="section" id="developing-new-algorithms-data-structures-and-tools">
 <h2>Developing new algorithms, data structures, and tools<a class="headerlink" href="#developing-new-algorithms-data-structures-and-tools" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="minhash-sketches-on-sequences-and-on-graphs">
-<h3>MinHash sketches on sequences and on graphs<a class="headerlink" href="#minhash-sketches-on-sequences-and-on-graphs" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="minhash-sketches-on-graphs">
+<h3>MinHash sketches on graphs<a class="headerlink" href="#minhash-sketches-on-graphs" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>MinHash sketches can be applied piecewise to graphs.</li>
+</ul>
 </div>
 <div class="section" id="spacegraphcats-domination-hierarchies-and-the-catlas">
 <h3>spacegraphcats, domination hierarchies, and the catlas<a class="headerlink" href="#spacegraphcats-domination-hierarchies-and-the-catlas" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>species separation &amp; better species partitioning</li>
 </ul>
+<p>(presentation)</p>
 </div>
 </div>
 <div class="section" id="future-directions">
 <h2>Future directions<a class="headerlink" href="#future-directions" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="streaming-assembly">
-<h3>Streaming assembly<a class="headerlink" href="#streaming-assembly" title="Permalink to this headline">¶</a></h3>
-</div>
-<div class="section" id="graph-indexing-of-short-and-long-read-data-sets">
-<h3>Graph indexing of short- (and long?)-read data sets<a class="headerlink" href="#graph-indexing-of-short-and-long-read-data-sets" title="Permalink to this headline">¶</a></h3>
-</div>
-<div class="section" id="graph-searching-more-generally">
-<h3>Graph searching more generally<a class="headerlink" href="#graph-searching-more-generally" title="Permalink to this headline">¶</a></h3>
-<p>BlastGraph etc.</p>
-</div>
-<div class="section" id="rnaseq-exploration-and-downsampling">
-<h3>RNAseq exploration and downsampling<a class="headerlink" href="#rnaseq-exploration-and-downsampling" title="Permalink to this headline">¶</a></h3>
-</div>
+<p>In no particular order,</p>
+<ul class="simple">
+<li>Streaming assembly</li>
+<li>Graph indexing of short- (and long?)-read data sets</li>
+<li>Structural variation analysis</li>
+<li>Graph searching more generally</li>
+<li>RNAseq exploration and downsampling</li>
+</ul>
 </div>
 </div>
 
@@ -114,11 +144,11 @@
       <div class="bottomnav" role="navigation" aria-label="bottom navigation">
       
         <p>
-        «&#160;&#160;<a href="infrastructure.html">Infrastructure and development for the khmer project</a>
+        «&#160;&#160;<a href="actually-using-khmer.html">Using khmer on real data</a>
         &#160;&#160;::&#160;&#160;
         <a class="uplink" href="index.html">Contents</a>
         &#160;&#160;::&#160;&#160;
-        <a href="blog-posts.html">Blog posts so far</a>&#160;&#160;»
+        <a href="considerations.html">Perspectives and considerations</a>&#160;&#160;»
         </p>
 
       </div>

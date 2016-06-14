@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="zaok 0.1 documentation" href="index.html" />
-    <link rel="next" title="Off label and emerging use cases" href="off-label-and-emerging-use-cases.html" />
+    <link rel="next" title="Future thoughts" href="future-thoughts.html" />
     <link rel="prev" title="Perspectives and considerations" href="considerations.html" /> 
   </head>
   <body role="document">
@@ -40,7 +40,7 @@
         &#160;&#160;::&#160;&#160;
         <a class="uplink" href="index.html">Contents</a>
         &#160;&#160;::&#160;&#160;
-        <a href="off-label-and-emerging-use-cases.html">Off label and emerging use cases</a>&#160;&#160;»
+        <a href="future-thoughts.html">Future thoughts</a>&#160;&#160;»
         </p>
 
       </div>
@@ -56,30 +56,58 @@ Git and GitHub.</p>
 </div>
 <div class="section" id="issue-tracking">
 <h2>Issue tracking<a class="headerlink" href="#issue-tracking" title="Permalink to this headline">¶</a></h2>
+<p>All issue tracking is done via github issues:
+<a class="reference external" href="https://github.com/dib-lab/khmer/issues">https://github.com/dib-lab/khmer/issues</a></p>
+<p>Note especially meta-issues:
+<a class="reference external" href="https://github.com/dib-lab/khmer/issues?utf8=%E2%9C%93&amp;q=is%3Aissue+is%3Aopen+meta">https://github.com/dib-lab/khmer/issues?utf8=%E2%9C%93&amp;q=is%3Aissue+is%3Aopen+meta</a></p>
 </div>
 <div class="section" id="automated-tests">
 <h2>Automated tests<a class="headerlink" href="#automated-tests" title="Permalink to this headline">¶</a></h2>
+<p>All tests are under <code class="docutils literal"><span class="pre">tests/</span></code>.</p>
+<p>We use py.test.</p>
+<p>All tests can be run with &#8216;make test&#8217;.</p>
+<p>You can run specific files with <code class="docutils literal"><span class="pre">py.test</span> <span class="pre">&lt;filename&gt;</span></code>.</p>
 </div>
 <div class="section" id="documentation">
 <h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<p>Documentation is written in reStructuredText.</p>
+<p>Documentation is hosted at <a class="reference external" href="https://khmer.readthedocs.io/">https://khmer.readthedocs.io/</a>.</p>
 </div>
 <div class="section" id="literate-resting">
 <h2>Literate resting<a class="headerlink" href="#literate-resting" title="Permalink to this headline">¶</a></h2>
+<p>We keep our tutorials and recipes working with automated tests a la:</p>
+<p><a class="reference external" href="https://github.com/dib-lab/literate-resting">https://github.com/dib-lab/literate-resting</a></p>
 </div>
 <div class="section" id="benchmarking">
 <h2>Benchmarking<a class="headerlink" href="#benchmarking" title="Permalink to this headline">¶</a></h2>
+<p>See &#64;jessicamizzi&#8217;s latest,
+<a class="reference external" href="https://github.com/jessicamizzi/ep-streaming/blob/master/Utilization-Figures.ipynb">https://github.com/jessicamizzi/ep-streaming/blob/master/Utilization-Figures.ipynb</a>,
+and 2014 PyCon (<a class="reference external" href="http://ivory.idyll.org/blog/2014-pycon.html">http://ivory.idyll.org/blog/2014-pycon.html</a>).</p>
 </div>
 <div class="section" id="communication">
 <h2>Communication<a class="headerlink" href="#communication" title="Permalink to this headline">¶</a></h2>
+<p>There are two mailing lists (<a class="reference external" href="http://lists.idyll.org/listinfo/khmer">khmer</a> and <a class="reference external" href="http://lists.idyll.org/listinfo/khmer-announce">khmer-announce</a>); we have a
+<a class="reference external" href="http://gitter.im/dib-lab/khmer">gitter channel</a>; and that&#8217;s about
+it.</p>
 </div>
-<div class="section" id="proposing-changes">
-<h2>Proposing changes<a class="headerlink" href="#proposing-changes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="proposing-changes-and-code-review">
+<h2>Proposing changes and code review<a class="headerlink" href="#proposing-changes-and-code-review" title="Permalink to this headline">¶</a></h2>
+<p>We use <a class="reference external" href="https://guides.github.com/introduction/flow/">GitHub Flow</a>;
+basically, submit pull requests.</p>
+<p>Docs for getting started:
+<a class="reference external" href="https://khmer.readthedocs.io/en/v2.0/dev/getting-started.html">https://khmer.readthedocs.io/en/v2.0/dev/getting-started.html</a></p>
+<p>We have coding guidelines and a code review checklist:
+<a class="reference external" href="https://khmer.readthedocs.io/en/v2.0/dev/coding-guidelines-and-review.html">https://khmer.readthedocs.io/en/v2.0/dev/coding-guidelines-and-review.html</a></p>
 </div>
 <div class="section" id="sandbox-scripts">
 <h2>Sandbox scripts<a class="headerlink" href="#sandbox-scripts" title="Permalink to this headline">¶</a></h2>
+<p>We have lots of scripts in <code class="docutils literal"><span class="pre">sandbox/</span></code> that are not officially
+supported but may be useful - see <a class="reference external" href="https://github.com/dib-lab/khmer/blob/master/sandbox/README.rst">README</a>.</p>
 </div>
 <div class="section" id="release-checklist">
 <h2>Release checklist<a class="headerlink" href="#release-checklist" title="Permalink to this headline">¶</a></h2>
+<p>We have a release checklist:</p>
+<p><a class="reference external" href="https://khmer.readthedocs.io/en/v2.0/dev/release.html">https://khmer.readthedocs.io/en/v2.0/dev/release.html</a></p>
 </div>
 </div>
 
@@ -92,7 +120,7 @@ Git and GitHub.</p>
         &#160;&#160;::&#160;&#160;
         <a class="uplink" href="index.html">Contents</a>
         &#160;&#160;::&#160;&#160;
-        <a href="off-label-and-emerging-use-cases.html">Off label and emerging use cases</a>&#160;&#160;»
+        <a href="future-thoughts.html">Future thoughts</a>&#160;&#160;»
         </p>
 
       </div>

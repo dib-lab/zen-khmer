@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="zaok 0.1 documentation" href="index.html" />
-    <link rel="next" title="Perspectives and considerations" href="considerations.html" />
+    <link rel="next" title="Off label and emerging use cases" href="off-label-and-emerging-use-cases.html" />
     <link rel="prev" title="Summarizing the basics" href="summarizing-khmer-basics.html" /> 
   </head>
   <body role="document">
@@ -40,7 +40,7 @@
         &#160;&#160;::&#160;&#160;
         <a class="uplink" href="index.html">Contents</a>
         &#160;&#160;::&#160;&#160;
-        <a href="considerations.html">Perspectives and considerations</a>&#160;&#160;»
+        <a href="off-label-and-emerging-use-cases.html">Off label and emerging use cases</a>&#160;&#160;»
         </p>
 
       </div>
@@ -55,10 +55,17 @@ k-mer abundance distribution analysis, k-mer abundance trimming,
 digital normalization, and partitioning.  There are also a set of
 scripts for data handling (e.g. read interleaving) that are just useful
 to have around.</p>
+<p>The documentation for the command line scripts is at
+<a class="reference external" href="https://khmer.readthedocs.io/en/v2.0/user/scripts.html">https://khmer.readthedocs.io/en/v2.0/user/scripts.html</a></p>
+<p>Note that we use <a class="reference external" href="http://semver.org/">Semantic Versioning</a> on the
+scripts, so (unlike the Python and C++ APIs) we guarantee that
+scripts will retain backwards compatibility (vice bugs) within any major
+release number, and that any minor release will only add command-line
+flags.</p>
 <div class="section" id="some-background-philosophy">
 <h2>Some background philosophy<a class="headerlink" href="#some-background-philosophy" title="Permalink to this headline">¶</a></h2>
 <p>We have largely shied away from actually producing a final result, and
-instead focused on building tools and utilites that manipulate data
+instead focused on building tools and utilities that manipulate data
 sets between generation and analysis.  In essence, we try to act as a
 filtering and forensics tool.  There are several reasons for this:</p>
 <ul class="simple">
@@ -75,17 +82,23 @@ being simple to run and easy to understand (at least individually).</li>
 <p>So, most of the tools and approaches described below act to slice and
 dice data, with the goal of feeding the data into other programs.</p>
 <p>The downsides to this approach are:</p>
-<ul class="simple">
-<li>bioinformatics formats still change frequently enough that keeping
-khmer working with them is a chore.</li>
-<li>it adds to the complexity of the process.  Many biologists would like
+<ul>
+<li><p class="first">bioinformatics formats still change frequently enough that keeping
+khmer working with them is a chore.</p>
+</li>
+<li><p class="first">it adds to the complexity of the process.  Many biologists would like
 a tool that simply <em>does the job</em>, and khmer is most emphatically not
-that tool.</li>
-<li>people may (rightly or wrongly) blame khmer when their results are
+that tool.</p>
+</li>
+<li><p class="first">people may (rightly or wrongly) blame khmer when their results are
 not good.  For example, people who apply digital normalization
 sometimes expect that they can continue to use their downstream
 tools with unchanged parameters, even though diginorm alters the
-coverage distribution; this is sometimes true, and sometimes not.</li>
+coverage distribution; this is sometimes true, and sometimes not.</p>
+<p>This was actually one of the motivations behind the semi-streaming
+trimming, which does very efficient k-mer error trimming using the
+diginorm paradigm without actually changing the coverage profile much.</p>
+</li>
 </ul>
 </div>
 <div class="section" id="k-mer-abundance-distribution-analysis">
@@ -100,42 +113,91 @@ data sets.  The procedure is as follows:</p>
 </ol>
 <p>The most straightforward use for this is just computing the k-mer
 abundance spectra; this can be done in one step for single files with
-<code class="docutils literal"><span class="pre">abundance-dist-single.py</span></code>, but for multiple data files you&#8217;ll need to
-use <code class="docutils literal"><span class="pre">load-into-counting.py</span></code> and concatenate the files into <code class="docutils literal"><span class="pre">abundance-dist.py</span></code>.</p>
+<code class="docutils literal"><span class="pre">abundance-dist-single.py</span></code>, but for multiple data files you&#8217;ll need
+to use <code class="docutils literal"><span class="pre">load-into-counting.py</span></code> and concatenate the files into
+<code class="docutils literal"><span class="pre">abundance-dist.py</span></code>.</p>
 <p>There are several utilities, including read coverage distribution
-analysis (&#64;&#64;).</p>
+analysis (see <code class="docutils literal"><span class="pre">sandbox/calc-median-distribution.py</span></code>).</p>
 </div>
 <div class="section" id="k-mer-abundance-trimming">
 <h2>K-mer abundance trimming<a class="headerlink" href="#k-mer-abundance-trimming" title="Permalink to this headline">¶</a></h2>
 <p>khmer is particularly good at removing low-abundance k-mers from data
 sets, for the purpose of removing errors and decreasing memory
-requirements (see XXX).  Typically this is done on a per-read basis,
-where each read (or pair of reads) is examined in the context of
-a k-mer database, and then the read(s) are trimmed at a given position.</p>
+requirements (see <a class="reference external" href="http://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0101271">Zhang et al., 2014</a>).
+Typically this is done on a
+per-read basis, where each read (or pair of reads) is examined in the
+context of a k-mer database, and then the read(s) are trimmed at a
+given position.</p>
 <p>We have two methods for doing this, non-streaming and streaming.</p>
+<div class="section" id="non-streaming">
+<h3>Non-streaming<a class="headerlink" href="#non-streaming" title="Permalink to this headline">¶</a></h3>
 <p>The non-streaming procedure is:</p>
 <ol class="arabic simple">
-<li>Create a countgraph from all of the data.</li>
-<li>For each data set</li>
+<li>Create a countgraph from all of the data (<code class="docutils literal"><span class="pre">load-into-counting.py</span></code>)</li>
+<li>For each data set, use <code class="docutils literal"><span class="pre">filter-abund.py</span></code> with the created countgraph to
+do abundance trimming.</li>
 </ol>
-<p>Here an important consideration is that &#8220;hard&#8221; k-mer abundance
-trimming (where you eliminate any k-mer with an abundance below a
-threshold) needs to be done in the context of the entire data set.
-&#8220;Soft&#8221; or variable-coverage k-mer abundance trimming can be done
-on each read data set individually, but should then be re-done on
-the whole data set.</p>
+</div>
+<div class="section" id="streaming">
+<h3>Streaming<a class="headerlink" href="#streaming" title="Permalink to this headline">¶</a></h3>
+<p>The streaming procedure is to run <code class="docutils literal"><span class="pre">trim-low-abund.py</span></code> on all your
+data at once.  This is described in <a class="reference external" href="https://peerj.com/preprints/890/">Zhang et al., 2015</a>.</p>
+</div>
+<div class="section" id="all-the-data-vs-some-of-the-data">
+<h3>All the data vs some of the data<a class="headerlink" href="#all-the-data-vs-some-of-the-data" title="Permalink to this headline">¶</a></h3>
+<p>For trimming, an important consideration is that &#8220;hard&#8221; k-mer
+abundance trimming (where you eliminate any k-mer with an abundance
+below a threshold) needs to be done in the context of the entire data
+set.  &#8220;Soft&#8221; or variable-coverage k-mer abundance trimming (<code class="docutils literal"><span class="pre">-V</span></code>)
+can be done on each read data set individually, but should then be
+re-done on the whole data set.</p>
 <p>Note, you can trim high-abundance k-mers off of reads with
 <code class="docutils literal"><span class="pre">sandbox/trim-below-abund.py</span></code>; this helps reduce and remove repeats.</p>
+<p>Note the correspondence between high-abundance k-mers and repeats.</p>
+</div>
 </div>
 <div class="section" id="digital-normalization">
 <h2>Digital normalization<a class="headerlink" href="#digital-normalization" title="Permalink to this headline">¶</a></h2>
-<p>&#64;&#64;can be done successively</p>
+<p>Digital normalization (<a class="reference external" href="https://arxiv.org/abs/1203.4802">Brown et al., 2012</a>) can be run with the
+<code class="docutils literal"><span class="pre">normalize-by-median.py</span></code> script; optionally, you can run it and do
+read trimming at the same time, using <code class="docutils literal"><span class="pre">trim-low-abund.py</span>
+<span class="pre">--diginorm</span></code>.</p>
+<p>If you&#8217;re not doing k-mer abundance trimming simultaneously with diginorm,
+then we recommend a three-pass approach to digital normalization:</p>
+<ol class="arabic simple">
+<li>Run normalize-by-median to a coverage of 20 (<code class="docutils literal"><span class="pre">-C</span> <span class="pre">20</span></code>);</li>
+<li>Apply error trimming (filter-abund.py);</li>
+<li>Run normalize-by-median to a coverage of 5.</li>
+</ol>
+<p>Otherwise you will statistically end up with a lot of errors in the 5 reads
+you have covering any particular locus.</p>
+<div class="section" id="id1">
+<h3>All the data vs some of the data<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>Diginorm can be run piecemeal on large data sets, because it retains
+low-coverage data; but by the end you should run it on all your data
+simultaneously.</p>
+</div>
 </div>
 <div class="section" id="partitioning">
 <h2>Partitioning<a class="headerlink" href="#partitioning" title="Permalink to this headline">¶</a></h2>
 <p>We don&#8217;t really recommend using this at the moment, but here&#8217;s roughly
 how it works:</p>
-<p>...</p>
+<ol class="arabic simple" start="0">
+<li>(Optionally, but recommended) Run digital normalization on all your reads.</li>
+<li>Build a tagged graph from diginorm reads (<code class="docutils literal"><span class="pre">load-graph.py</span></code>).</li>
+<li>Partition the graph (potentially piecewise) using <code class="docutils literal"><span class="pre">partition-graph.py</span></code>.</li>
+<li>Merge partitions (<code class="docutils literal"><span class="pre">merge-partitions.py</span></code>)</li>
+<li>Extract the reads by partition (<code class="docutils literal"><span class="pre">extract-partitions.py</span></code>).</li>
+</ol>
+<p>For small data sets, you can run <code class="docutils literal"><span class="pre">do-partition.py</span></code> to do all of this at
+once.</p>
+<p>Partitioning is described in <a class="reference external" href="http://www.pnas.org/content/109/33/13272.abstract">Pell et al., 2012</a> and applied to
+soil metagenomes in <a class="reference external" href="www.pnas.org/content/111/13/4904">Howe et al., 2014</a>.</p>
+<p>Note:</p>
+<ul class="simple">
+<li>k-mer size k &lt; k_0 issue: if you partition at a low k-mer size, all higher
+k paths remain.</li>
+</ul>
 </div>
 <div class="section" id="recipes">
 <h2>Recipes<a class="headerlink" href="#recipes" title="Permalink to this headline">¶</a></h2>
@@ -155,12 +217,59 @@ because they verify that khmer works as part of a larger set of tools.</p>
 <h2>Choosing parameters<a class="headerlink" href="#choosing-parameters" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="memory-parameters-and-where-they-matter">
 <h3>Memory parameters, and where they matter<a class="headerlink" href="#memory-parameters-and-where-they-matter" title="Permalink to this headline">¶</a></h3>
+<p>Most of the scripts are either low memory or constant memory; in the
+case of the constant memory scripts, the max memory used is specified
+by the <code class="docutils literal"><span class="pre">-M</span></code> parameter, plus epsilon (&#8220;a small bit&#8221;).  The major
+exception here is <code class="docutils literal"><span class="pre">filter-abund.py</span></code> and <code class="docutils literal"><span class="pre">filter-abund-single.py</span></code>
+which use 1.1x the <code class="docutils literal"><span class="pre">-M</span></code> parameter because they allocate both a Countgraph
+and a Nodegraph.</p>
+<p>For any scripts that use <code class="docutils literal"><span class="pre">Nodegraph</span></code> or <code class="docutils literal"><span class="pre">Countgraph</span></code>, the optimal
+memory parameters can be computed from the number of unique k-mers present
+in the data set (which is one of the reasons for the HyperLogLog
+functionality).</p>
+<p>Counting scripts may use the optional <code class="docutils literal"><span class="pre">bigcount</span></code> code which stores
+high counts for k-mers exactly, in an STL map.</p>
+<p>Partitioning and tagging use unconstrained amounts of memory.</p>
+<p>The impact of low memory and false positives on graph structure is
+discussed in <a class="reference external" href="http://www.pnas.org/content/109/33/13272.abstract">Pell et al., 2012</a>, and the effect
+of false positives on k-mer counting is analyzed in <a class="reference external" href="http://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0101271">Zhang et al.,
+2014</a></p>
 </div>
 <div class="section" id="k-mer-sizes-and-k-mer-size-limitations">
 <h3>K-mer sizes, and k-mer size limitations<a class="headerlink" href="#k-mer-sizes-and-k-mer-size-limitations" title="Permalink to this headline">¶</a></h3>
+<p>We have two hash functions implemented in khmer currently.</p>
+<p>The primary hash function (as implemented by <code class="docutils literal"><span class="pre">hash</span></code>) is reversible
+(with <code class="docutils literal"><span class="pre">reverse_hash</span></code>).  Hash values are stored in 64-bit numbers and
+hence can only go up to k=32.  This can be problematic, but the
+reversibility is thoroughly baked into the traversal code and we need
+to do a reasonable amount of refactoring to fix this (see
+<a class="reference external" href="https://github.com/dib-lab/khmer/issues/60">https://github.com/dib-lab/khmer/issues/60</a> and linked issues).  An
+alternate solution would be to allow multiple hash functions
+(see <a class="reference external" href="https://github.com/dib-lab/khmer/issues/27">https://github.com/dib-lab/khmer/issues/27</a>).</p>
+<p>The &#8220;secondary&#8221; hash function (used by HyperLogLog and MinHash sketching) is
+64-bit <a class="reference external" href="https://en.wikipedia.org/wiki/MurmurHash">MurmurHash</a>.  It is
+an irreversible hash function that can be used for arbitrary text.  There
+is no k-mer size limitation on it.</p>
 </div>
 <div class="section" id="input-and-output-formats">
 <h3>Input and output formats<a class="headerlink" href="#input-and-output-formats" title="Permalink to this headline">¶</a></h3>
+<p>khmer consumes FASTA and FASTQ, both single- and paired-end.</p>
+<p>khmer&#8217;s output format leaves the headers unchanged, with the exception of
+the partitioning code, which annotates the headers with the partition
+ID.  (Yes, this was a bad idea.)</p>
+<div class="section" id="paired-end-sequence-names">
+<h4>Paired end sequence names<a class="headerlink" href="#paired-end-sequence-names" title="Permalink to this headline">¶</a></h4>
+<p>khmer supports most of the paired-end naming schemes.</p>
+</div>
+<div class="section" id="interleaved-vs-split-reads">
+<h4>Interleaved vs split reads<a class="headerlink" href="#interleaved-vs-split-reads" title="Permalink to this headline">¶</a></h4>
+<p>By default, khmer takes in &#8220;broken-paired&#8221; format, in which pairs of
+reads are immediately adjacent to each other in the file.  This can be
+easily and efficiently split into paired/single-ended files, as well
+as left- and right-reads.  We have scripts to do this, too.</p>
+<p>The major rationale for broken-paired format is that it permits reads to
+be kept together for the purposes of streaming.</p>
+</div>
 </div>
 </div>
 </div>
@@ -174,7 +283,7 @@ because they verify that khmer works as part of a larger set of tools.</p>
         &#160;&#160;::&#160;&#160;
         <a class="uplink" href="index.html">Contents</a>
         &#160;&#160;::&#160;&#160;
-        <a href="considerations.html">Perspectives and considerations</a>&#160;&#160;»
+        <a href="off-label-and-emerging-use-cases.html">Off label and emerging use cases</a>&#160;&#160;»
         </p>
 
       </div>
