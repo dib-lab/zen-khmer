@@ -24,6 +24,8 @@ Contents:
    considerations
    future-thoughts
 
+   examples
+
    blog-posts
 
 Indices and tables

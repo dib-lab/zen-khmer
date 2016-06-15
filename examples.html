@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Some examples &mdash; zaok 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="zaok 0.1 documentation" href="index.html" />
+    <link rel="next" title="Blog posts so far" href="blog-posts.html" />
+    <link rel="prev" title="Future thoughts" href="future-thoughts.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>zaok 0.1 documentation</span></a></h1>
+        <h2 class="heading"><span>Some examples</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="future-thoughts.html">Future thoughts</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="blog-posts.html">Blog posts so far</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="some-examples">
+<h1>Some examples<a class="headerlink" href="#some-examples" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="extracting-unassembled-reads">
+<h2>Extracting unassembled reads<a class="headerlink" href="#extracting-unassembled-reads" title="Permalink to this headline">¶</a></h2>
+<p>If we want to extract unassembled reads, we can do the following:</p>
+<ul class="simple">
+<li>load the reads in &amp; tag them;</li>
+<li>load the assembly in and label all the matching tags;</li>
+<li>walk over the reads and extract any read that doesn&#8217;t have an unlabeled
+tag.</li>
+</ul>
+<p>This is implemented in the khmer script
+<code class="docutils literal"><span class="pre">sandbox/extract-unassembled-reads.py</span></code>.</p>
+<hr class="docutils" />
+<p>We probably want to work with low-error reads, so, first pre-process the
+reads to eliminate errors:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">trim</span><span class="o">-</span><span class="n">low</span><span class="o">-</span><span class="n">abund</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">C</span> <span class="mi">5</span> <span class="o">-</span><span class="n">Z</span> <span class="mi">20</span> <span class="o">-</span><span class="n">M</span> <span class="mi">1</span><span class="n">e7</span> <span class="n">data</span><span class="o">/</span><span class="n">mixed</span><span class="o">-</span><span class="n">reads</span><span class="o">.</span><span class="n">fa</span><span class="o">.</span><span class="n">gz</span>
+</pre></div>
+</div>
+<p>Then, run <code class="docutils literal"><span class="pre">extract-unassembled-reads.py</span></code>; here, we&#8217;ll run it with an
+&#8220;assembly&#8221; that is missing the low-abundance genome (1/10th of the data).</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">../</span><span class="n">khmer</span><span class="o">/</span><span class="n">sandbox</span><span class="o">/</span><span class="n">extract</span><span class="o">-</span><span class="n">unassembled</span><span class="o">-</span><span class="n">reads</span><span class="o">.</span><span class="n">py</span> <span class="n">data</span><span class="o">/</span><span class="n">mixed</span><span class="o">-</span><span class="n">species</span><span class="o">-</span><span class="mf">1.</span><span class="n">fa</span><span class="o">.</span><span class="n">gz</span> <span class="n">mixed</span><span class="o">-</span><span class="n">reads</span><span class="o">.</span><span class="n">fa</span><span class="o">.</span><span class="n">gz</span><span class="o">.</span><span class="n">abundtrim</span>
+<span class="c1"># output: 1116 left out of assembly, of 4286 reads</span>
+</pre></div>
+</div>
+<p>In this case (simulated data) we get 0 reads if we use the true genome:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">../</span><span class="n">khmer</span><span class="o">/</span><span class="n">sandbox</span><span class="o">/</span><span class="n">extract</span><span class="o">-</span><span class="n">unassembled</span><span class="o">-</span><span class="n">reads</span><span class="o">.</span><span class="n">py</span> <span class="n">data</span><span class="o">/</span><span class="n">mixed</span><span class="o">-</span><span class="n">species</span><span class="o">.</span><span class="n">fa</span><span class="o">.</span><span class="n">gz</span> <span class="n">mixed</span><span class="o">-</span><span class="n">reads</span><span class="o">.</span><span class="n">fa</span><span class="o">.</span><span class="n">gz</span><span class="o">.</span><span class="n">abundtrim</span>
+<span class="c1"># output: 0 left out of assembly, of 4286 reads</span>
+</pre></div>
+</div>
+<p>If we use the un-trimmed reads, then a bunch of reads don&#8217;t match b/c of
+errors:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sandbox</span><span class="o">/</span><span class="n">extract</span><span class="o">-</span><span class="n">unassembled</span><span class="o">-</span><span class="n">reads</span><span class="o">.</span><span class="n">py</span> <span class="n">data</span><span class="o">/</span><span class="n">mixed</span><span class="o">-</span><span class="n">species</span><span class="o">.</span><span class="n">fa</span><span class="o">.</span><span class="n">gz</span> <span class="n">data</span><span class="o">/</span><span class="n">mixed</span><span class="o">-</span><span class="n">reads</span><span class="o">.</span><span class="n">fa</span><span class="o">.</span><span class="n">gz</span>
+<span class="c1"># output: 568 left out of assembly, of 5508 reads</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="future-thoughts.html">Future thoughts</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="blog-posts.html">Blog posts so far</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, C. Titus Brown.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>
