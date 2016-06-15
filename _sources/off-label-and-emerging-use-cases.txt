@@ -106,7 +106,7 @@ Thoughts:
 
 Quick demo - run from within `spacegraphcats
 <https://github.com/spacegraphcats/spacegraphcats>`__ repo, and have
-the ``oldhash`` branch of `sourmash
+the master branch of `sourmash
 <https://github.com/dib-lab/sourmash>`__ in your path.  First, build
 the catlas::
 
@@ -128,7 +128,7 @@ To search w/MinHash sketches, build a signature & dump it::
 
 Then, search::
   
-  spacegraphcats/search-catlas-levels.py acido acido-short.fa.sigdump.txt 
+  spacegraphcats/search-catlas-levels.py acido acido-short.fa.sig.dump.txt
 
 Future directions
 =================

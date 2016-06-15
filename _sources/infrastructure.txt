@@ -14,8 +14,7 @@ Issue tracking
 All issue tracking is done via github issues:
 https://github.com/dib-lab/khmer/issues
 
-Note especially meta-issues:
-https://github.com/dib-lab/khmer/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+meta
+Note especially `meta issues <https://github.com/dib-lab/khmer/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+meta>`__ that discuss collections of issues.
 
 Automated tests
 ===============
