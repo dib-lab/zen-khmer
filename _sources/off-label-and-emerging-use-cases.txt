@@ -106,7 +106,7 @@ Thoughts:
 
 Quick demo - run from within `spacegraphcats
 <https://github.com/spacegraphcats/spacegraphcats>`__ repo, and have
-the ``oldhash`` branch of ``sourmash
+the ``oldhash`` branch of `sourmash
 <https://github.com/dib-lab/sourmash>`__ in your path.  First, build
 the catlas::
 
